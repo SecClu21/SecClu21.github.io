@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TCP vs UDP Analyst Guide</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+        .indent1 { margin-left: 2rem; }
+        .indent2 { margin-left: 4rem; }
+        table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background: #f5f5f5; }
+        strong { color: #1a73e8; }
+    </style>
+</head>
+<body>
+    <div class="indent1">
+        <strong>TCP vs UDP: What Analysts Detect in Network Traffic</strong>
+        <p>A practical SOC analyst guide to recognizing TCP and UDP attack patterns in packet captures, logs, and SIEM alerts.</p>
+        
+        <p>Understanding the differences and security implications of Transmission Control Protocol (TCP) and User Datagram Protocol (UDP) is foundational for defensive cybersecurity roles. These protocols carry most internet traffic, from legitimate web requests to attacker command-and-control (C2) beacons. Analysts must recognize normal patterns to detect protocol exploitation during triage, hunting, and incident response.</p>
+        
+        <p>TCP and UDP appear constantly in firewall logs, packet captures, and Security Information and Event Management (SIEM) alerts. Attackers weaponize both protocols in multiple ways. This article covers the fundamentals of TCP and UDP, common attack examples, and practical analyst workflows. By the end of this guide, you'll have a clearer idea of what to look for in TCP and UDP traffic and where it appears in logs and packet captures, so you can start developing an analyst's eye for abnormal behavior.</p>
+        
+        <h3>What They Are</h3>
+        
+        <div class="indent2">
+            <p>TCP establishes reliable connections through a three-way handshake where devices exchange SYN, SYN-ACK, and ACK packets before data transmission begins. TCP then uses sequence numbers to detect lost packets, trigger retransmissions, and ensure ordered delivery. Analysts rely on this predictable connection lifecycle (often described as a TCP state machine) when baselining normal web traffic patterns. These predictable patterns help analysts baseline normal web traffic.</p>
+        </div>
+        
+        <div class="indent2">
+            <p>UDP skips all connection overhead for maximum speed. There's no handshake—just datagrams with source/destination ports and a basic checksum. Lost packets disappear silently with no retransmission or guaranteed ordering. This makes UDP perfect for DNS queries and streaming, but a challenge for analysts hunting volume-based attacks.</p>
+        </div>
+        
+        <h4>Key Differences Between TCP and UDP:</h4>
+        
+        <table>
+            <tr><th>Feature</th><th>TCP</th><th>UDP</th></tr>
+            <tr><td>Connection</td><td>Connection-oriented</td><td>Connectionless</td></tr>
+            <tr><td>Reliability</td><td>Guaranteed delivery, sequencing</td><td>No guarantees, no sequencing</td></tr>
+            <tr><td>Error checking</td><td>Extensive</td><td>Basic checksum</td></tr>
+            <tr><td>Speed</td><td>Slower</td><td>Faster</td></tr>
+            <tr><td>Common use cases</td><td>Web, email, FTP</td><td>Live video, DNS, gaming</td></tr>
+        </table>
+    </div>
+</body>
+</html>
