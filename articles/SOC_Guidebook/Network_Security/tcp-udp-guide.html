@@ -4,17 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TCP vs UDP: What Analysts Detect in Network Traffic</title>
-    
-    <!-- SEO Core -->
-    <meta name="description" content="Entry-level SOC analyst guide: TCP SYN floods, UDP amplification attacks, Wireshark/Zeek triage workflows #SOCAnalyst #DFIR">
+    <meta name="description" content="Practical SOC analyst guide to TCP vs UDP attack patterns in packet captures, logs, SIEM alerts. Wireshark Zeek workflows.">
+    <meta name="keywords" content="TCP UDP, SOC analyst, cybersecurity, packet analysis, Wireshark Zeek, DFIR, network attacks">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://yourusername.github.io/tcp-udp/">
-    
-    <!-- Social + Hashtags -->
-    <meta property="og:title" content="TCP vs UDP Attacks - SOC Analyst Field Guide">
-    <meta property="og:description" content="Detect SYN floods, UDP amplification, port scans. Wireshark filters + Zeek logs for #BlueTeam #EntryLevelCyber">
+    <meta property="og:title" content="TCP vs UDP: What Analysts Detect in Network Traffic">
+    <meta property="og:description" content="SOC guide to TCP/UDP attacks, triage workflows, Wireshark/Zeek for entry-level cybersecurity">
     <meta property="og:type" content="article">
-    <meta name="twitter:keywords" content="Cybersecurity SOCAnalyst BlueTeam DFIR TCP UDP PacketAnalysis">
     <style>
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
@@ -38,18 +33,25 @@
             color: #2d3748; 
             margin-top: 25px;
         }
+        h4 { 
+            color: #4a5568;
+            margin-top: 20px;
+        }
         p { 
             margin-bottom: 18px; 
             text-align: justify;
         }
-        .indent { 
-            margin-left: 25px; 
+        .first-line-indent {
+            text-indent: 25px;
         }
         .double-indent { 
             margin-left: 50px; 
         }
         .triple-indent { 
             margin-left: 75px; 
+        }
+        .quad-indent {
+            margin-left: 100px;
         }
         table { 
             border-collapse: collapse; 
@@ -69,13 +71,6 @@
         }
         tr:nth-child(even) { 
             background-color: #f7fafc; 
-        }
-        ul { 
-            margin: 15px 0; 
-            padding-left: 25px;
-        }
-        li { 
-            margin-bottom: 8px;
         }
         ol { 
             margin: 15px 0; 
@@ -103,8 +98,13 @@
             font-size: 1.1em;
             margin-bottom: 30px;
         }
+        code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
     </style>
-
 </head>
 <body>
 
@@ -112,17 +112,17 @@
 
 <p class="subtitle">A practical SOC analyst guide to recognizing TCP and UDP attack patterns in packet captures, logs, and SIEM alerts.</p>
 
-<p class="indent">Understanding the differences and security implications of Transmission Control Protocol (TCP) and User Datagram Protocol (UDP) is foundational for defensive cybersecurity roles. These protocols carry most internet traffic, from legitimate web requests to attacker command-and-control (C2) beacons. Analysts must recognize normal patterns to detect protocol exploitation during triage, hunting, and incident response.</p>
+<p class="first-line-indent">    Understanding the differences and security implications of Transmission Control Protocol (TCP) and User Datagram Protocol (UDP) is foundational for defensive cybersecurity roles. These protocols carry most internet traffic, from legitimate web requests to attacker command-and-control (C2) beacons. Analysts must recognize normal patterns to detect protocol exploitation during triage, hunting, and incident response.</p>
 
-<p class="indent">TCP and UDP appear constantly in firewall logs, packet captures, and Security Information and Event Management (SIEM) alerts. Attackers weaponize both protocols in multiple ways. This article covers the fundamentals of TCP and UDP, common attack examples, and practical analyst workflows. By the end of this guide, you'll have a clearer idea of what to look for in TCP and UDP traffic and where it appears in logs and packet captures, so you can start developing an analyst's eye for abnormal behavior.</p>
+<p class="first-line-indent">    TCP and UDP appear constantly in firewall logs, packet captures, and Security Information and Event Management (SIEM) alerts. Attackers weaponize both protocols in multiple ways. This article covers the fundamentals of TCP and UDP, common attack examples, and practical analyst workflows. By the end of this guide, you'll have a clearer idea of what to look for in TCP and UDP traffic and where it appears in logs and packet captures, so you can start developing an analyst's eye for abnormal behavior.</p>
 
 <h2>What They Are</h2>
 
-<p class="indent">TCP establishes reliable connections through a three-way handshake where devices exchange SYN, SYN-ACK, and ACK packets before data transmission begins. TCP then uses sequence numbers to detect lost packets, trigger retransmissions, and ensure ordered delivery. Analysts rely on this predictable connection lifecycle (often described as a TCP state machine) when baselining normal web traffic patterns. These predictable patterns help analysts baseline normal web traffic.</p>
+<p class="first-line-indent">    TCP establishes reliable connections through a three-way handshake where devices exchange SYN, SYN-ACK, and ACK packets before data transmission begins. TCP then uses sequence numbers to detect lost packets, trigger retransmissions, and ensure ordered delivery. Analysts rely on this predictable connection lifecycle (often described as a TCP state machine) when baselining normal web traffic patterns. These predictable patterns help analysts baseline normal web traffic.</p>
 
-<p class="indent">UDP skips all connection overhead for maximum speed. There's no handshake—just datagrams with source/destination ports and a basic checksum. Lost packets disappear silently with no retransmission or guaranteed ordering. This makes UDP perfect for DNS queries and streaming, but a challenge for analysts hunting volume-based attacks.</p>
+<p class="first-line-indent">    UDP skips all connection overhead for maximum speed. There's no handshake—just datagrams with source/destination ports and a basic checksum. Lost packets disappear silently with no retransmission or guaranteed ordering. This makes UDP perfect for DNS queries and streaming, but a challenge for analysts hunting volume-based attacks.</p>
 
-<h3 class="indent">Key Differences Between TCP and UDP:</h3>
+<h3>Key Differences Between TCP and UDP:</h3>
 
 <table>
     <thead>
@@ -163,11 +163,11 @@
 
 <h2>Why TCP and UDP Matter in Cybersecurity</h2>
 
-<p class="indent">TCP's connection state creates predictable patterns that attackers often target for disruption. Its structured lifecycle from SYN to FIN generates rich telemetry that analysts baseline against daily. When these patterns break, Blue Teams immediately recognize potential scanning or DoS activity in their packet captures and firewall logs.</p>
+<p class="first-line-indent">    TCP's connection state creates predictable patterns that attackers often target for disruption. Its structured lifecycle from SYN to FIN generates rich telemetry that analysts baseline against daily. When these patterns break, Blue Teams immediately recognize potential scanning or DoS activity in their packet captures and firewall logs.</p>
 
-<p class="indent">UDP's connectionless nature lacks the conversation flow that makes TCP easier to analyze. Without handshakes or acknowledgments, analysts must hunt volume anomalies and unexpected service port activity instead. This stateless design becomes an ideal vector for amplification attacks that overwhelm defenders with asymmetric traffic.</p>
+<p class="first-line-indent">    UDP's connectionless nature lacks the conversation flow that makes TCP easier to analyze. Without handshakes or acknowledgments, analysts must hunt volume anomalies and unexpected service port activity instead. This stateless design becomes an ideal vector for amplification attacks that overwhelm defenders with asymmetric traffic.</p>
 
-<p class="indent">Once you understand how TCP and UDP normally behave, the real skill is noticing when their traffic patterns become abnormal. The following sections outline common attack types for each protocol, showing first how the behavior looks on the wire (Patterns) and then what you actually see in firewall logs, NetFlow summaries, and packet captures (Indicators). Use these as mental checklists when you review alerts or investigate unusual traffic in a SOC or lab environment.</p>
+<p class="first-line-indent">    Once you understand how TCP and UDP normally behave, the real skill is noticing when their traffic patterns become abnormal. The following sections outline common attack types for each protocol, showing first how the behavior looks on the wire (Patterns) and then what you actually see in firewall logs, NetFlow summaries, and packet captures (Indicators). Use these as mental checklists when you review alerts or investigate unusual traffic in a SOC or lab environment.</p>
 
 <h2>Common TCP and UDP Attack Behaviors</h2>
 
@@ -190,6 +190,7 @@
 <p class="quad-indent">◦ Indicators: Duplicate or abnormal sequence numbers, unexpected session resets, and anomalous payloads within active streams from new source IPs.</p>
 
 <h3 class="double-indent">UDP Attack Patterns and Indicators</h3>
+
 <h4 class="triple-indent">• UDP Floods</h4>
 <p class="quad-indent">◦ Patterns: High volumes of UDP packets to one or many targets, including open or closed ports.</p>
 <p class="quad-indent">◦ Indicators: Network saturation, large amounts of traffic to unused ports, and spikes in ICMP "Port Unreachable" responses.</p>
@@ -208,110 +209,114 @@
 
 <h2>Tools & Techniques (+ Practice Ideas)</h2>
 
-<p class="indent">SIEM alerts on SYN floods, UDP amplification, or port scans show initial indicators from firewall and Intrusion Detection System (IDS) logs. This is often where analysts start. From there, they pivot to Wireshark for packet‑level detail and Zeek for connection‑level patterns when they need to dig deeper into suspicious TCP/UDP behavior.</p>
+<p class="first-line-indent">    SIEM alerts on SYN floods, UDP amplification, or port scans show initial indicators from firewall and Intrusion Detection System (IDS) logs. This is often where analysts start. From there, they pivot to Wireshark for packet‑level detail and Zeek for connection‑level patterns when they need to dig deeper into suspicious TCP/UDP behavior.</p>
 
-<h3 class="indent">Wireshark – Packet-Level Inspection </h3>
+<h3>Wireshark – Packet-Level Inspection</h3>
 
-<p class="double-indent">Wireshark enables deep packet analysis when validating suspected TCP or UDP abuse. Analysts use it to confirm whether suspicious network behavior aligns with known attack patterns or benign misconfigurations. </p>
+<p class="first-line-indent">        Wireshark enables deep packet analysis when validating suspected TCP or UDP abuse. Analysts use it to confirm whether suspicious network behavior aligns with known attack patterns or benign misconfigurations.</p>
 
-<p class="triple-indent">• Key Views: Follow TCP Stream, handshake flag analysis, and UDP payload inspection for volume or port anomalies. </p>
+<p class="triple-indent">• Key Views: Follow TCP Stream, handshake flag analysis, and UDP payload inspection for volume or port anomalies.</p>
 
-<p class="triple-indent">• Common Findings: </p>
-<p class="quad-indent">◦ TCP Floods – Repetitive SYN packets without completing handshakes, often visible as many half-opens. </p>
-<p class="quad-indent">◦ UDP Floods – Rapid traffic to closed ports; rising counts of ICMP "Destination Unreachable" replies. </p>
+<p class="triple-indent">• Common Findings:</p>
+<p class="quad-indent">◦ TCP Floods – Repetitive SYN packets without completing handshakes, often visible as many half-opens.</p>
+<p class="quad-indent">◦ UDP Floods – Rapid traffic to closed ports; rising counts of ICMP "Destination Unreachable" replies.</p>
 
-<p class="triple-indent">• Useful Filters: <code>tcp.flags.syn==1 && tcp.flags.ack==0</code> to isolate incomplete sessions; <code>udp.port==53 || udp.port==123</code> to monitor DNS/NTP activity. </p>
+<p class="triple-indent">• Useful Filters: <code>tcp.flags.syn==1 && tcp.flags.ack==0</code> to isolate incomplete sessions; <code>udp.port==53 || udp.port==123</code> to monitor DNS/NTP activity.</p>
 
 <p class="triple-indent">• Practice Idea: Run <code>nmap -sS &lt;target_ip&gt;</code> (TCP SYN scan) or <code>nmap -sU &lt;target_ip&gt;</code> (UDP scan) against a VM lab you control; capture with Wireshark and spot scanning patterns via rapid SYNs across ports or ICMP "Port Unreachable" replies.</p>
 
-<h3 class="indent">Zeek – Network Metadata & Behavior Analysis </h3>
+<h3>Zeek – Network Metadata & Behavior Analysis</h3>
 
-<p class="double-indent">Zeek converts raw packet data into structured network logs that reveal connection patterns over time. Analysts read these logs to spot abnormal traffic states or spoofed connections that may evade simple packet filters. </p>
+<p class="first-line-indent">        Zeek converts raw packet data into structured network logs that reveal connection patterns over time. Analysts read these logs to spot abnormal traffic states or spoofed connections that may evade simple packet filters.</p>
 
-<p class="triple-indent">• Key Logs: <code>conn.log</code>, <code>weird.log</code>, <code>notice.log</code> — each highlights deviations from baseline behavior. </p>
+<p class="triple-indent">• Key Logs: <code>conn.log</code>, <code>weird.log</code>, <code>notice.log</code> — each highlights deviations from baseline behavior.</p>
 
-<p class="triple-indent">• Common Findings: </p>
-<p class="quad-indent">◦ TCP Floods: Half-open sessions appearing as S0 or SH states. </p>
-<p class="quad-indent">◦ UDP Reflection: Outbound reply volume far exceeding inbound request size or rate. </p>
+<p class="triple-indent">• Common Findings:</p>
+<p class="quad-indent">◦ TCP Floods: Half-open sessions appearing as S0 or SH states.</p>
+<p class="quad-indent">◦ UDP Reflection: Outbound reply volume far exceeding inbound request size or rate.</p>
 
-<p class="triple-indent">• Practice Idea: Run Zeek against a stored pcap of TCP and UDP attack simulations; compare connection state codes and analyze byte-transfer ratios to differentiate amplification from normal service traffic. </p>
+<p class="triple-indent">• Practice Idea: Run Zeek against a stored pcap of TCP and UDP attack simulations; compare connection state codes and analyze byte-transfer ratios to differentiate amplification from normal service traffic.</p>
 
-<h3 class="indent">SIEM & Log Correlation (Splunk, Elastic, QRadar, etc.) </h3>
+<h3>SIEM & Log Correlation (Splunk, Elastic, QRadar, etc.)</h3>
 
-<p class="double-indent">At scale, analysts pivot from individual packet traces to correlated telemetry across firewalls, IDS platforms, NetFlow data, and other network sensors. A SIEM consolidates indicators from Zeek, Suricata, and host logs into actionable detection events. </p>
+<p class="first-line-indent">        At scale, analysts pivot from individual packet traces to correlated telemetry across firewalls, IDS platforms, NetFlow data, and other network sensors. A SIEM consolidates indicators from Zeek, Suricata, and host logs into actionable detection events.</p>
 
-<p class="triple-indent">• Common Detection Use-Cases: </p>
-<p class="quad-indent">◦ SYN Flood Rules: Alert on hosts showing rising SYN counts with no matching ACKs. </p>
-<p class="quad-indent">◦ UDP Volume Anomalies: Baseline port traffic and generate alerts when external sources show sustained deviations. </p>
-<p class="quad-indent">◦ Port Scan Correlation: Identify repeated attempts across many destination ports or IPs within a short window. </p>
+<p class="triple-indent">• Common Detection Use-Cases:</p>
+<p class="quad-indent">◦ SYN Flood Rules: Alert on hosts showing rising SYN counts with no matching ACKs.</p>
+<p class="quad-indent">◦ UDP Volume Anomalies: Baseline port traffic and generate alerts when external sources show sustained deviations.</p>
+<p class="quad-indent">◦ Port Scan Correlation: Identify repeated attempts across many destination ports or IPs within a short window.</p>
 
-<p class="triple-indent">• Practice Idea: Import Zeek or Suricata logs into your chosen SIEM; build a simple saved search or correlation rule for high SYN-to-ACK ratios or UDP port spikes, then observe how alerts group related events. </p>
+<p class="triple-indent">• Practice Idea: Import Zeek or Suricata logs into your chosen SIEM; build a simple saved search or correlation rule for high SYN-to-ACK ratios or UDP port spikes, then observe how alerts group related events.</p>
 
-<h2>SOC Analyst Perspective </h2>
+<h2>SOC Analyst Perspective</h2>
 
-<p class="indent">SOC triage for TCP/UDP attacks follows a standard detect-analyze-respond progression. The workflows below demonstrate this structure using three common examples. SYN floods, UDP amplification, and port scanning each produce observable protocol behaviors addressed through these triage steps.</p>
+<p class="first-line-indent">    SOC triage for TCP/UDP attacks follows a standard detect-analyze-respond progression. The workflows below demonstrate this structure using three common examples. SYN floods, UDP amplification, and port scanning each produce observable protocol behaviors addressed through these triage steps.</p>
 
-<h3 class="indent">SYN Flood Triage Workflow </h3>
+<h3>SYN Flood Triage Workflow</h3>
 
 <ol class="double-indent">
     <li>First — Wireshark filter <code>tcp.flags.syn==1 && tcp.flags.ack==0</code>.<br>
-    This isolates incomplete handshakes. Legitimate traffic completes the TCP handshake. Attacks send SYNs only. </li>
+    This isolates incomplete handshakes. Legitimate traffic completes the TCP handshake. Attacks send SYNs only.</li>
     <li>Then — Zeek conn.log S0/SH states.<br>
     S0 = "connection attempt seen, no reply".<br>
     SH = "SYN sent but no SYN-ACK".<br>
     In many environments, normal traffic shows a very small percentage of these states (often less than 1%).</li>
     <li>Escalate if SYN:ACK ratio leans heavily in favor of SYN packets. A ratio of 10:1 or greater, for example, is a strong signal.<br>
-    Normal web traffic maintains approximately a 1:1 SYN:ACK ratio since legitimate connections complete the handshake. <br>
-    SYN flood attacks typically produce 50:1 or higher ratios because they send SYN packets without completing handshakes. <br>
+    Normal web traffic maintains approximately a 1:1 SYN:ACK ratio since legitimate connections complete the handshake.<br>
+    SYN flood attacks typically produce 50:1 or higher ratios because they send SYN packets without completing handshakes.<br>
     Always provide packet samples showing the SYN-only pattern as evidence when escalating to the incident response team.</li>
 </ol>
 
-<h3 class="indent">UDP Amplification Investigation </h3>
+<h3>UDP Amplification Investigation</h3>
 
 <ol class="double-indent">
-    <li>First — Zeek conn.log: high Port Unreachable ICMP responders. <br>
+    <li>First — Zeek conn.log: high Port Unreachable ICMP responders.<br>
     Indicates probes hitting closed ports on internal servers.<br>
     Legitimate UDP traffic rarely generates these at scale.</li>
-    <li>Then — Zeek: responder bytes exceed originator bytes by 10x or more. <br>
-    Confirms true traffic amplification (small probes leading to large replies). <br>
-    Normal UDP maintains balanced request-response sizes. </li>
+    <li>Then — Zeek: responder bytes exceed originator bytes by 10x or more.<br>
+    Confirms true traffic amplification (small probes leading to large replies).<br>
+    Normal UDP maintains balanced request-response sizes.</li>
     <li>Check firewall logs for source IP patterns and targeting, then decide whether to block based on volume, persistence, and impact.<br>
-    Single source = direct amplification attempt. <br>
-    Multiple sources = potential botnet; block common characteristics. <br>
+    Single source = direct amplification attempt.<br>
+    Multiple sources = potential botnet; block common characteristics.<br>
     Packet captures showing probe‑to‑reply asymmetry help confirm the activity for incident response.</li>
 </ol>
 
-<h3 class="indent">Port Scan Detection</h3>
+<h3>Port Scan Detection</h3>
 <ol class="double-indent">
-    <li>First — In Zeek's conn.log, look for a single source IP that touches an unusually large range of destination ports or an unusually wide range of destination hosts. <br>
+    <li>First — In Zeek's conn.log, look for a single source IP that touches an unusually large range of destination ports or an unusually wide range of destination hosts.<br>
     Normal clients typically hit fewer than 10 predictable ports on fewer than 10 hosts.<br>
-    Scanners probe either many ports on a few hosts or single ports across many hosts. </li>
-    <li>Then — The connection rate exceeds 100 attempts in 5 minutes, for example. <br>
-    Legitimate traffic maintains stable rates to known services. <br>
-    Scanners generate high-volume probes regardless of scan direction. </li>
+    Scanners probe either many ports on a few hosts or single ports across many hosts.</li>
+    <li>Then — The connection rate exceeds 100 attempts in 5 minutes, for example.<br>
+    Legitimate traffic maintains stable rates to known services.<br>
+    Scanners generate high-volume probes regardless of scan direction.</li>
     <li>Block source IP at the firewall.<br>
     Zeek conn.log patterns plus firewall logs provide clear evidence for incident response.</li>
 </ol>
 
 <h2>Conclusion</h2>
 
-<p class="indent">TCP and UDP form the foundation of most network traffic analysis in cybersecurity operations. Understanding their distinct behaviors, TCP's reliable handshakes versus UDP's fire-and-forget datagrams, enables SOC analysts to quickly separate normal communication from malicious patterns like floods and scans. This knowledge directly improves triage speed, reduces obvious false positives, and supports more effective escalation during incident response.</p>
+<p class="first-line-indent">    TCP and UDP form the foundation of most network traffic analysis in cybersecurity operations. Understanding their distinct behaviors, TCP's reliable handshakes versus UDP's fire-and-forget datagrams, enables SOC analysts to quickly separate normal communication from malicious patterns like floods and scans. This knowledge directly improves triage speed, reduces obvious false positives, and supports more effective escalation during incident response.</p>
 
-<p class="indent">Mastering these protocols equips analysts to interpret the majority of firewall logs, packet captures, and IDS alerts they encounter daily. Analysts who recognize protocol-specific anomalies can pivot faster from detection to investigation, correlating network data with endpoint telemetry for comprehensive threat validation. This capability proves essential across threat hunting, alert triage, and digital forensics and incident response (DFIR) workflows.</p>
+<p class="first-line-indent">    Mastering these protocols equips analysts to interpret the majority of firewall logs, packet captures, and IDS alerts they encounter daily. Analysts who recognize protocol-specific anomalies can pivot faster from detection to investigation, correlating network data with endpoint telemetry for comprehensive threat validation. This capability proves essential across threat hunting, alert triage, and digital forensics and incident response (DFIR) workflows.</p>
 
-<p class="indent">Practical application begins with analyzing Wireshark packet captures and Zeek connection logs to solidify understanding of TCP and UDP behavior. These hands-on exercises directly build the skills needed for IDS rule analysis and SIEM alert triage. The logical next topic, DNS protocol analysis, expands these fundamentals into common attack vectors like tunneling and amplification, and future articles in this series will explore additional protocols such as DNS, HTTP, and TLS from a SOC analyst detection perspective.</p>
+<p class="first-line-indent">    Practical application begins with analyzing Wireshark packet captures and Zeek connection logs to solidify understanding of TCP and UDP behavior. These hands-on exercises directly build the skills needed for IDS rule analysis and SIEM alert triage. The logical next topic, DNS protocol analysis, expands these fundamentals into common attack vectors like tunneling and amplification, and future articles in this series will explore additional protocols such as DNS, HTTP, and TLS from a SOC analyst detection perspective.</p>
 
 <div class="section-break"></div>
 
 <div class="about-section">
 <h3>About this guide:</h3>
-<p><strong>Skills:</strong> Packet Analysis, Log Analysis, Threat Triage, Zeek, Wireshark </p>
+<p><strong>Skills:</strong> Packet Analysis, Log Analysis, Threat Triage, Zeek, Wireshark</p>
 <p><strong>Target Audience:</strong> Entry-Level Cybersecurity | Students | Aspiring SOC Analysts | Early Career Defenders</p>
 <p><strong>For:</strong> Building SOC Fundamentals | Beginner Level</p>
 </div>
-<div class="tags">
-<strong>Tags:</strong> #Cybersecurity #SOCAnalyst #BlueTeam #DFIR #EntryLevelCyber #Networking #TCP/UDP #PacketAnalysis #NetworkDetection
-</div>
+
+<p class="tags">
+<strong>Tags & Metadata</strong><br>
+#Cybersecurity #SOCAnalyst #BlueTeam #DFIR #EntryLevelCyber<br>
+#Networking #TCP/UDP #PacketAnalysis #NetworkDetection
+</p>
 
 </body>
 </html>
+
