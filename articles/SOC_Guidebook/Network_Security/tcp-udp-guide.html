@@ -110,7 +110,7 @@
         strong {
             font-weight: bold;
             color: #1a3c5e;
-        }
+
     </style>
 </head>
 <body>
@@ -222,15 +222,15 @@
 
 <p class="first-line-indent">        Wireshark enables deep packet analysis when validating suspected TCP or UDP abuse. Analysts use it to confirm whether suspicious network behavior aligns with known attack patterns or benign misconfigurations.</p>
 
-<p class="triple-indent">• Key Views: Follow TCP Stream, handshake flag analysis, and UDP payload inspection for volume or port anomalies.</p>
+<p class="double-indent">• Key Views: Follow TCP Stream, handshake flag analysis, and UDP payload inspection for volume or port anomalies.</p>
 
-<p class="triple-indent">• Common Findings:</p>
-<p class="quad-indent">◦ TCP Floods – Repetitive SYN packets without completing handshakes, often visible as many half-opens.</p>
-<p class="quad-indent">◦ UDP Floods – Rapid traffic to closed ports; rising counts of ICMP "Destination Unreachable" replies.</p>
+<p class="double-indent">• Common Findings:</p>
+<p class="triple-indent">◦ TCP Floods – Repetitive SYN packets without completing handshakes, often visible as many half-opens.</p>
+<p class="triple-indent">◦ UDP Floods – Rapid traffic to closed ports; rising counts of ICMP "Destination Unreachable" replies.</p>
 
-<p class="triple-indent">• Useful Filters: <code>tcp.flags.syn==1 && tcp.flags.ack==0</code> to isolate incomplete sessions; <code>udp.port==53 || udp.port==123</code> to monitor DNS/NTP activity.</p>
+<p class="double-indent">• Useful Filters: <code>tcp.flags.syn==1 && tcp.flags.ack==0</code> to isolate incomplete sessions; <code>udp.port==53 || udp.port==123</code> to monitor DNS/NTP activity.</p>
 
-<p class="triple-indent">• Practice Idea: Run <code>nmap -sS &lt;target_ip&gt;</code> (TCP SYN scan) or <code>nmap -sU &lt;target_ip&gt;</code> (UDP scan) against a VM lab you control; capture with Wireshark and spot scanning patterns via rapid SYNs across ports or ICMP "Port Unreachable" replies.</p>
+<p class="double-indent">• Practice Idea: Run <code>nmap -sS &lt;target_ip&gt;</code> (TCP SYN scan) or <code>nmap -sU &lt;target_ip&gt;</code> (UDP scan) against a VM lab you control; capture with Wireshark and spot scanning patterns via rapid SYNs across ports or ICMP "Port Unreachable" replies.</p>
 
 <h3>Zeek – Network Metadata & Behavior Analysis</h3>
 
@@ -242,7 +242,7 @@
 <p class="quad-indent">◦ TCP Floods: Half-open sessions appearing as S0 or SH states.</p>
 <p class="quad-indent">◦ UDP Reflection: Outbound reply volume far exceeding inbound request size or rate.</p>
 
-<p class="triple-indent">• Practice Idea: Run Zeek against a stored pcap of TCP and UDP attack simulations; compare connection state codes and analyze byte-transfer ratios to differentiate amplification from normal service traffic.</p>
+<p class="triple-indent">• <em>Practice Idea: </em> Run Zeek against a stored pcap of TCP and UDP attack simulations; compare connection state codes and analyze byte-transfer ratios to differentiate amplification from normal service traffic.</p>
 
 <h3>SIEM & Log Correlation (Splunk, Elastic, QRadar, etc.)</h3>
 
