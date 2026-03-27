@@ -182,37 +182,37 @@
 
 <h4 class="double-indent">• SYN Floods</h4>
 <p class="triple-indent">◦ <strong>Patterns:</strong> Large volumes of SYN packets, many incomplete handshakes, and numerous half-open connections.</p>
-<p class="quad-indent"><strong>◦ Indicators:</strong> High SYN queue utilization, timeouts or resource exhaustion alerts, and a disproportionate SYN-to-ACK ratio in packet captures or NetFlow (summaries of IPs, ports, and bytes sent, without the full packet contents).</p>
+<p class="triple-indent">◦ <strong>Indicators:</strong> High SYN queue utilization, timeouts or resource exhaustion alerts, and a disproportionate SYN-to-ACK ratio in packet captures or NetFlow (summaries of IPs, ports, and bytes sent, without the full packet contents).</p>
 
-<h4 class="triple-indent">• TCP Port Scanning</h4>
-<p class="quad-indent">◦ Patterns: Sequential connection attempts to many ports on a single host from the same source IP (vertical scanning), or single port across multiple hosts (horizontal scanning).</p>
-<p class="quad-indent">◦ Indicators: Multiple SYN packets to different ports in a short period, increased RST or SYN-ACK responses, and a low rate of fully established sessions.</p>
+<h4 class="double-indent">• TCP Port Scanning</h4>
+<p class="triple-indent">◦ <strong>Patterns:</strong> Sequential connection attempts to many ports on a single host from the same source IP (vertical scanning), or single port across multiple hosts (horizontal scanning).</p>
+<p class="triple-indent">◦ <strong>Indicators:</strong> Multiple SYN packets to different ports in a short period, increased RST or SYN-ACK responses, and a low rate of fully established sessions.</p>
 
-<h4 class="triple-indent">• TCP Reset (RST) Attacks</h4>
-<p class="quad-indent">◦ Patterns: Unusual frequency of RST packets targeting active connections from unexpected sources.</p>
-<p class="quad-indent">◦ Indicators: Legitimate connections dropping suddenly, frequent session interruptions, and increased RST counts from IPs outside the normal client-server path.</p>
+<h4 class="double-indent">• TCP Reset (RST) Attacks</h4>
+<p class="triple-indent">◦ <strong>Patterns:</strong> Unusual frequency of RST packets targeting active connections from unexpected sources.</p>
+<p class="triple-indent">◦ <strong>Indicators</strong>: Legitimate connections dropping suddenly, frequent session interruptions, and increased RST counts from IPs outside the normal client-server path.</p>
 
-<h4 class="triple-indent">• Session Hijacking</h4>
-<p class="quad-indent">◦ Patterns: Spoofed or manipulated sequence numbers and injected packets into an established session.</p>
-<p class="quad-indent">◦ Indicators: Duplicate or abnormal sequence numbers, unexpected session resets, and anomalous payloads within active streams from new source IPs.</p>
+<h4 class="double-indent">• Session Hijacking</h4>
+<p class="triple-indent">◦ <strong>Patterns:</strong> Spoofed or manipulated sequence numbers and injected packets into an established session.</p>
+<p class="triple-indent">◦ <strong>Indicators:</strong> Duplicate or abnormal sequence numbers, unexpected session resets, and anomalous payloads within active streams from new source IPs.</p>
 
-<h3 class="double-indent">UDP Attack Patterns and Indicators</h3>
+<h4 class="single-indent">UDP Attack Patterns and Indicators</h4>
 
-<h4 class="triple-indent">• UDP Floods</h4>
-<p class="quad-indent">◦ Patterns: High volumes of UDP packets to one or many targets, including open or closed ports.</p>
-<p class="quad-indent">◦ Indicators: Network saturation, large amounts of traffic to unused ports, and spikes in ICMP "Port Unreachable" responses.</p>
+<h4 class="double-indent">• UDP Floods</h4>
+<p class="triple-indent">◦ <strong>Patterns:</strong> High volumes of UDP packets to one or many targets, including open or closed ports.</p>
+<p class="triple-indent">◦ <strong>Indicators:</strong> Network saturation, large amounts of traffic to unused ports, and spikes in ICMP "Port Unreachable" responses.</p>
 
-<h4 class="triple-indent">• UDP Amplification Attacks</h4>
-<p class="quad-indent">◦ Patterns: Small UDP requests to services like DNS or NTP that trigger very large replies to a spoofed victim.</p>
-<p class="quad-indent">◦ Indicators: Outbound traffic much greater than legitimate inbound requests, spikes on known UDP service ports, and unusual request/response size ratios.</p>
+<h4 class="double-indent">• UDP Amplification Attacks</h4>
+<p class="triple-indent">◦ <strong>Patterns:</strong> Small UDP requests to services like DNS or NTP that trigger very large replies to a spoofed victim.</p>
+<p class="triple-indent">◦ <strong>Indicators:</strong> Outbound traffic much greater than legitimate inbound requests, spikes on known UDP service ports, and unusual request/response size ratios.</p>
 
-<h4 class="triple-indent">• UDP Port Scanning</h4>
-<p class="quad-indent">◦ Patterns: Probing a range of UDP ports from a single IP, often hitting less common service ports.</p>
-<p class="quad-indent">◦ Indicators: Multiple UDP packets across ports with little expected application activity and many ICMP "Port Unreachable" messages.</p>
+<h4 class="double-indent">• UDP Port Scanning</h4>
+<p class="triple-indent">◦ <strong>Patterns:</strong> Probing a range of UDP ports from a single IP, often hitting less common service ports.</p>
+<p class="triple-indent">◦ <strong>Indicators:</strong> Multiple UDP packets across ports with little expected application activity and many ICMP "Port Unreachable" messages.</p>
 
-<h4 class="triple-indent">• UDP Spoofing and Reflection</h4>
-<p class="quad-indent">◦ Patterns: UDP packets with forged source IP addresses, especially toward amplification-prone services.</p>
-<p class="quad-indent">◦ Indicators: Sudden bursts of UDP traffic with inconsistent or unexpected source addresses and anomalies on ports used by reflection attacks.</p>
+<h4 class="double-indent">• UDP Spoofing and Reflection</h4>
+<p class="triple-indent">◦ <strong>Patterns:</strong> UDP packets with forged source IP addresses, especially toward amplification-prone services.</p>
+<p class="triple-indent">◦ <strong>Indicators:</strong> Sudden bursts of UDP traffic with inconsistent or unexpected source addresses and anomalies on ports used by reflection attacks.</p>
 
 <h2>Tools & Techniques (+ Practice Ideas)</h2>
 
