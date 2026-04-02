@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNS in the SOC: From Name Resolution to Detection Opportunities</title>
+    <meta name="description" content="Practical SOC analyst guide to DNS attack patterns in packet captures, logs, SIEM alerts. DNS workflows.">
+    <meta name="keywords" content="DNS, SOC analyst, cybersecurity, packet analysis, Wireshark, DFIR, network attacks, Entry level cyber, Network detection, threat detection, DNS Tunneling, DNS Abuse, DNS Security">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="DNS: What Analysts Detect in Network Traffic">
+    <meta property="og:description" content="SOC guide to DNS attacks, triage workflows, Wireshark for entry-level cybersecurity">
+    <meta property="og:type" content="article">
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            line-height: 1.6; 
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 30px; 
+            color: #333; 
+        }
+        h1 { 
+            color: #1a3c5e; 
+            border-bottom: 4px solid #1a3c5e; 
+            padding-bottom: 15px; 
+            margin-bottom: 20px;
+        }
+        h2 { 
+            color: #2c5282; 
+            margin-top: 30px;
+        }
+        h3 { 
+            color: #2d3748; 
+            margin-top: 25px;
+        }
+        h4 { 
+            color: #4a5568;
+            margin-top: 20px;
+        }
+        p { 
+            margin-bottom: 18px; 
+            text-align: justify;
+        }
+        .first-line-indent {
+            text-indent: 25px;
+        }
+        .single-indent {
+            margin-left: 25px; 
+        }
+        .double-indent { 
+            margin-left: 50px; 
+        }
+        .triple-indent { 
+            margin-left: 75px; 
+        }
+        .quad-indent {
+            margin-left: 100px;
+        }
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            margin: 25px 0; 
+            font-size: 14px;
+        }
+        th, td { 
+            border: 1px solid #ddd; 
+            padding: 12px; 
+            text-align: left; 
+        }
+        th { 
+            background-color: #1a3c5e; 
+            color: white; 
+            font-weight: bold;
+        }
+        tr:nth-child(even) { 
+            background-color: #f7fafc; 
+        }
+        ol { 
+            margin: 15px 0; 
+            padding-left: 25px;
+        }
+        .section-break {
+            margin: 40px 0;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 20px;
+        }
+        .about-section {
+            background: #f7fafc;
+            padding: 25px;
+            border-left: 5px solid #1a3c5e;
+            margin: 40px 0;
+        }
+        .tags {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+        }
+        .subtitle {
+            font-style: italic;
+            color: #4a5568;
+            font-size: 1.1em;
+            margin-bottom: 30px;
+        }
+        code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        strong {
+            font-weight: bold;
+            color: #1a3c5e;
+
+    </style>
+</head>
+<body>
+
+<h1>DNS in the SOC: From Name Resolution to Detection Opportunities</h1>
+
+  <p class="subtitle">A practical SOC analyst guide to recognizing DNS attack patterns in packet captures, logs, and SIEM alerts.</p>
+  
+  <p class="first-line-indent">    Domain Name System (DNS) is often described as the “phonebook” of the internet, mapping human‑friendly domain names to IP addresses so clients can find resources across networks. This naming layer is what allows users to type example.com instead of memorizing IPs and still reach web servers, APIs, or internal applications. When DNS was originally designed, its creators did not anticipate modern attackers abusing its open, unauthenticated nature, or defenders trying to monitor it for subtle signs of compromise. </p>
+  <p class="first-line-indent">    As environments grew more complex, DNS became deeply embedded in how operating systems, applications, and services discover each other. Today, adversaries misuse DNS for command‑and‑control (C2) communication, data exfiltration, phishing infrastructure, and domain‑generation algorithms (DGAs), while defenders treat DNS logs and traffic patterns as a critical source of detection signals. At the same time, DNS is essential to normal network operations and cannot simply be blocked or disabled, which makes understanding normal behavior—and how attackers twist it—especially important for early‑career defenders. </p>
+  <p class="first-line-indent">    Security enhancements like DNS over TLS (DoT), DNS over HTTPS (DoH), and DNS Security Extensions (DNSSEC) were introduced to protect different parts of the DNS ecosystem, but they do not replace the need to understand plain DNS behavior. This guide takes a practical view of DNS from a defender’s perspective, connecting core concepts to common abuse patterns and the kinds of evidence you will see in logs and network data during real investigations. </p>
+
+
+<h2>What DNS Is</h2>
+
+  <p class="first-line-indent">DNS separates human friendly names from IP addresses. Instead of applications talking directly in IPs, they ask DNS “what IP should I use for this name?”, then use the answer to connect.</p>
+  <p class="first-line-indent"> From a SOC analyst’s perspective, DNS is not just a convenience service; it is a structured record of who tried to look up what, and when. Each query captures a client (source IP or host), a name, a record type, and a response code, all of which can become useful detection signals during triage and hunting.</p>
+
+ <h3 class="single-indent"> Concept Breakdown: How DNS Works </h3>
+  <p class="double-indent">This is the “just enough” version; your separate fundamentals article can cover the full resolver flow.</p>
+  <h4 class="double-indent"> Key Roles:</h4>
+    <p class="triple-indent"> <strong>•	Stub resolver </strong> OS component on the client that forwards DNS queries for applications.</p>
+    <p class="triple-indent"><strong>•	Recursive resolver </strong>– DNS server your client points to (organizational or ISP). It finds answers and caches them.</p>
+    <p class="triple-indent"><strong>•	Authoritative name servers </strong>– Servers that hold the official records for a domain (for example, the authoritative servers for example.com).</p>
+
+      High level flow
+1.	Client asks its configured resolver for a record (for example, the A record for www.example.com).
+2.	Resolver checks its cache; if it has a valid answer, it responds immediately.
+3.	If not cached, resolver walks the hierarchy (root → TLD like .com → authoritative server for the domain) to get the answer.
+4.	Resolver returns the answer to the client and caches it for the time to live (TTL).
+As an analyst, you rarely see each hop, but you frequently see the resulting queries and answers in DNS or SIEM logs.
+    Common record types in logs
+•	A / AAAA – Map a name to an IPv4 (A) or IPv6 (AAAA) address.
+•	CNAME – Alias from one name to another (for example, www.example.com → app.example.com).
+•	MX – Mail exchange; where to deliver email for a domain.
+•	NS – Name server; which servers are authoritative for a zone.
+•	TXT – Free form text (SPF/DMARC, verification); can also be abused for tunneling or attacker controlled data.
+    Encrypted DNS and DNSSEC 
+•	DNS over TLS (DoT) – DNS queries/responses carried over a TLS encrypted channel, typically port 853; hides contents from intermediaries and makes tampering detectable.
+•	DNS over HTTPS (DoH) – DNS queries sent inside HTTPS (usually port 443); similar protection to DoT but mixed into normal web traffic, complicating some monitoring and blocking approaches.
+•	DNSSEC – Adds cryptographic signatures so resolvers can verify that responses came from the legitimate authoritative servers and were not modified (for example, cache poisoning). It does not encrypt DNS; it protects authenticity and integrity, not confidentiality.
+For this guide, the key takeaway is: DoT and DoH encrypt DNS in transit; DNSSEC helps you trust that answers are genuine. All three change where and how defenders can observe DNS behavior, but they do not remove DNS as a detection surface.
+
+  
+</body>
