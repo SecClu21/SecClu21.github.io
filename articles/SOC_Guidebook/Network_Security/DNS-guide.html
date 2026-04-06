@@ -135,30 +135,165 @@
     <p class="triple-indent"> <strong>•	Stub resolver </strong> OS component on the client that forwards DNS queries for applications.</p>
     <p class="triple-indent"><strong>•	Recursive resolver </strong>– DNS server your client points to (organizational or ISP). It finds answers and caches them.</p>
     <p class="triple-indent"><strong>•	Authoritative name servers </strong>– Servers that hold the official records for a domain (for example, the authoritative servers for example.com).</p>
- <h4 class="double-indent">High level flow</h4>
-    <ol class="triple-indent">
-        <li class="quad-indent">1.	Client asks its configured resolver for a record (for example, the A record for www.example.com).</li>
-        <li class="quad-indent">2.	Resolver checks its cache; if it has a valid answer, it responds immediately.</li>
-        <li class="quad-indent">3.	If not cached, resolver walks the hierarchy (root → TLD like .com → authoritative server for the domain) to get the answer.</li>
-        <li class="quad-indent">4.	Resolver returns the answer to the client and caches it for the time to live (TTL).</li>
+   <h4 class="double-indent">High level flow</h4>
+    <ol>
+        <li class="triple-indent"> Client asks its configured resolver for a record (for example, the A record for www.example.com).</li>
+        <li class="triple-indent"> Resolver checks its cache; if it has a valid answer, it responds immediately.</li>
+        <li class="triple-indent"> If not cached, resolver walks the hierarchy (root → TLD like .com → authoritative server for the domain) to get the answer.</li>
+        <li class="triple-indent"> Resolver returns the answer to the client and caches it for the time to live (TTL).</li>
     </ol>
-    <p class="triple-input">As an analyst, you rarely see each hop, but you frequently see the resulting queries and answers in DNS or SIEM logs.</p>
+    <p class="double-input">As an analyst, you rarely see each hop, but you frequently see the resulting queries and answers in DNS or SIEM logs.</p>
     <h4 class="double-indent">Common record types in logs</h4>
     <ul>
-        <li class="triple-indent">•	A / AAAA – Map a name to an IPv4 (A) or IPv6 (AAAA) address.</li>
-        <li class="triple-indent">•	CNAME – Alias from one name to another (for example, www.example.com → app.example.com).</li>
-        <li class="triple-indent">•	MX – Mail exchange; where to deliver email for a domain.</li>
-        <li class="triple-indent">•	NS – Name server; which servers are authoritative for a zone.</li>
-        <li class="triple-indent">•	TXT – Free form text (SPF/DMARC, verification); can also be abused for tunneling or attacker controlled data.</li>
+        <li class="triple-indent">	A / AAAA – Map a name to an IPv4 (A) or IPv6 (AAAA) address.</li>
+        <li class="triple-indent">	CNAME – Alias from one name to another (for example, www.example.com → app.example.com).</li>
+        <li class="triple-indent">	MX – Mail exchange; where to deliver email for a domain.</li>
+        <li class="triple-indent">	NS – Name server; which servers are authoritative for a zone.</li>
+        <li class="triple-indent">	TXT – Free form text (SPF/DMARC, verification); can also be abused for tunneling or attacker controlled data.</li>
     </ul>
     <h4 class="double-indent">Encrypted DNS and DNSSEC</h4>
     <ul>
-        <li class="triple-indent">•	DNS over TLS (DoT) – DNS queries/responses carried over a TLS encrypted channel, typically port 853; hides contents from intermediaries and makes tampering detectable.</li>
-        <li class="triple-indent">•	DNS over HTTPS (DoH) – DNS queries sent inside HTTPS (usually port 443); similar protection to DoT but mixed into normal web traffic, complicating some monitoring and blocking approaches.</li>
-        <li class="triple-indent">•	DNSSEC – Adds cryptographic signatures so resolvers can verify that responses came from the legitimate authoritative servers and were not modified (for example, cache poisoning). It does not encrypt DNS; it protects authenticity and integrity, not confidentiality.</li>
+        <li class="triple-indent">	DNS over TLS (DoT) – DNS queries/responses carried over a TLS encrypted channel, typically port 853; hides contents from intermediaries and makes tampering detectable.</li>
+        <li class="triple-indent">	DNS over HTTPS (DoH) – DNS queries sent inside HTTPS (usually port 443); similar protection to DoT but mixed into normal web traffic, complicating some monitoring and blocking approaches.</li>
+        <li class="triple-indent">	DNSSEC – Adds cryptographic signatures so resolvers can verify that responses came from the legitimate authoritative servers and were not modified (for example, cache poisoning). It does not encrypt DNS; it protects authenticity and integrity, not confidentiality.</li>
     </ul>
     <p class="double-indent">For this guide, the key takeaway is: DoT and DoH encrypt DNS in transit; DNSSEC helps you trust that answers are genuine. All three change where and how defenders can observe DNS behavior, but they do not remove DNS as a detection surface.</p>
-        
 
-  
+<h2>DNS Attack Patterns and Indicators</h2>
+    <h3 class="double-indent">• Malware C2 Over DNS</h3>
+        <p class="triple-indent">•	<strong>Patterns</strong>: Malware uses DNS queries and responses as a covert channel to communicate with command and control (C2) servers, often blending C2 lookups in with normal name resolution. Queries may target long, random looking domains or a rotating set of subdomains under the same parent.</p>
+        <p class="triple-indent">•	<strong>Indicators:</strong> Repeated DNS queries from a single host to domains with algorithmic looking names, bursts of NXDOMAIN responses before a successful resolution, and DNS activity from a host at regular intervals regardless of user behavior. Correlation with endpoint alerts (suspicious processes generating those queries) strengthens confidence in C2 use.</p>
+    <h3 class="double-indent">•	DNS Tunneling and Data Exfiltration</h3>
+        <p class="triple-indent">•	<strong>Patterns:</strong> Attackers encode data inside DNS queries or responses, typically in subdomains or TXT records, to bypass firewalls and proxies. This often produces unusually long or high entropy subdomains and an elevated volume of specific record types.</p>
+        <p class="triple-indent">•	<strong>Indicators: </strong>Very long subdomain labels with random looking characters, an unusually high number of TXT (or other uncommon) record lookups from a single client, and DNS query volumes that are disproportionately large compared to that host’s normal web or application traffic. Resolver logs showing repeated queries to the same domain with constantly changing subdomains are strong tunneling signals.</p>
+    <h3 class="double-indent">•	DNS Hijacking and Spoofing</h3>
+        <p class="triple-indent">•	<strong>Patterns:</strong> Adversaries alter DNS responses or compromise resolvers so that victims are silently redirected to malicious infrastructure instead of legitimate destinations. This can involve changing authoritative name servers, poisoning caches, or spoofing responses on the wire.</p>
+        <p class="triple-indent">•	<strong>Indicators:</strong> DNS responses for familiar domains resolving to unexpected IP ranges, sudden changes in NS or A records for critical domains, and mismatches between answers from different resolvers (for example, internal resolver vs a trusted public resolver). User reports of “legitimate” sites looking wrong combined with DNS logs showing new or unusual IPs for those domains are red flags.</p>
+    <h3 class="double-indent">•	Fast Flux and Dynamic Hosting</h3>
+        <p class="triple-indent">•	<strong>Patterns:</strong> A single domain rapidly cycles through many different IP addresses to make blocking and takedown more difficult. These IPs often span multiple networks, ISPs, or geographic regions, and DNS TTLs are kept short to force frequent re resolution.</p>
+        <p class="triple-indent">•	<strong>Indicators:</strong> DNS logs showing a domain resolving to many distinct IP addresses within short time windows, very low TTL values in responses, and IPs associated with known bad reputation networks or previously seen malicious campaigns. A domain tied to phishing or malware that exhibits constant IP churn is a classic fast flux signal.</p>
+    <h3 class="double-indent">•	Suspicious Use of TXT and Other Uncommon Records</h3>
+        <p class="triple-indent">•	<strong>Patterns:</strong> While TXT records are legitimately used for SPF, DKIM, and service verification, attackers may abuse them to store or move data, keys, or configuration for malware. Other rarely used record types can be similarly abused to hide data in plain sight.</p>
+    <h3 class="double-indent">•	Anomalous Resolver Usage and Exfil via External Resolvers</h3>
+        <p class="triple-indent">•	<strong>Patterns:</strong> Compromised hosts may bypass internal DNS controls by sending queries directly to external public resolvers or attacker controlled resolvers. This can be used for C2, exfiltration, or to evade internal DNS logging and policies.</p>
+        <p class="triple-indent">•	<strong>Indicators:</strong> Internal endpoints making DNS requests directly to external resolver IPs instead of the organization’s standard recursive resolvers, especially over non standard ports or using DoH endpoints. DNS traffic from unexpected network segments to public resolvers, combined with unusual domains or volumes, can indicate evasion of internal monitoring.</p>
+
+
+
+Tools & Techniques (+ Practice Ideas)
+DNS evidence shows up at multiple layers. Analysts typically start with DNS or SIEM logs, then pivot into packet captures or endpoint telemetry when patterns look suspicious.
+DNS Server / Resolver Logs
+DNS server logs are often the primary source for understanding who queried which domains and how often. They capture client IPs, queried names, record types, and response codes.
+•	Key fields: client IP, query name, record type (A, AAAA, TXT, etc.), response code (NOERROR, NXDOMAIN), and response IPs.
+•	Common findings:
+•	High NXDOMAIN rates from a single host (possible DGA or misconfigured tunneling).
+•	Unusually long or high entropy subdomains under a small number of domains.
+•	Non DNS infrastructure (like application servers) generating unexpected DNS patterns.
+•	Practice idea: Export a small sample of resolver logs from a lab or training environment. Count queries per client and per domain, then identify:
+•	Top talkers (most querying hosts).
+•	Domains with the most NXDOMAIN responses.
+•	Any domains with very long subdomains.
+SIEM and Log Correlation
+At scale, DNS is usually analyzed through a centralized log platform that aggregates events from resolvers, firewalls, endpoints, and threat feeds. This lets analysts spot abnormal DNS behavior in context.
+•	Common detection use cases:
+•	DGA / suspicious domain rules: high NXDOMAIN counts, algorithmic looking names, or sudden spikes in rare domains.
+•	Tunneling detection: excessive TXT lookups, long subdomains, or high query volume from a single host.
+•	Policy evasion: internal hosts sending DNS directly to public resolvers instead of approved internal resolvers.
+•	Practice idea: In a lab SIEM, ingest DNS logs and build saved searches for:
+•	“Top 10 clients by NXDOMAIN count.”
+•	“Domains with more than N distinct subdomains queried in 24 hours.”
+Review results and flag any entries that do not match expected business use.
+Packet Captures and Protocol Analysis (Wireshark or Similar)
+Packet captures provide the full DNS wire view, including query/response sizes, flags, and transport details. They are especially useful when investigating suspected tunneling, spoofing, or protocol misuse.
+•	Key views:
+•	Filter on udp.port == 53 || tcp.port == 53 to see traditional DNS traffic.
+•	Inspect query names, response codes, and lengths of individual labels (subdomains).
+•	Look at TCP usage for DNS (zone transfers, DoT tunnels terminating locally).
+•	Common findings:
+•	Single hosts generating DNS queries far larger or more frequent than typical clients.
+•	Clear text DNS carrying long, encoded strings in subdomains or TXT records.
+•	Signs of spoofing or hijacking (unexpected source IPs for responses, mismatched transaction IDs).
+•	Practice idea: Capture DNS traffic while performing normal browsing, then compare with a public DNS tunneling PCAP from a training source. Identify:
+•	How normal query/response sizes and subdomain lengths look.
+•	How tunneling traffic stands out in label length and frequency.
+Endpoint / EDR Telemetry
+Endpoint tools can often link DNS queries back to the processes that generated them, which is critical for narrowing down suspicious DNS activity to specific binaries or scripts.
+•	Useful signals:
+•	Which executable initiated a suspicious DNS query (browser vs unknown process).
+•	Whether the same process also made unusual network connections or file changes.
+•	Correlation between process start times and bursts of odd DNS requests.
+•	Practice idea: On a lab endpoint with monitoring enabled, generate DNS queries using a browser, a command line tool (like nslookup or dig), and a simple script. Compare how each appears in the endpoint logs and note which fields tie the DNS activity back to a specific process.
+Configuration and Control (Resolvers and Firewalls)
+While this guide is focused on detection, analysts should understand where control points exist for DNS.
+•	Resolver level controls:
+•	Blocking or redirecting known malicious domains.
+•	Enforcing use of internal resolvers instead of public ones.
+•	Enabling detailed query logging for high value segments.
+•	Network level controls:
+•	Limiting outbound DNS to approved resolvers.
+•	Detecting and blocking unauthorized DoH endpoints where policy requires visibility.
+•	Practice idea: In a lab environment, configure a firewall rule to only allow DNS to your internal resolver, then attempt to send DNS directly to an external resolver or DoH endpoint. Observe how the logs record the blocked attempts and how that would appear to a SOC analyst.
+SOC Analyst Perspective
+SOC triage for DNS focuses on spotting abnormal name resolution patterns, validating whether they map to attacker behaviors, and deciding when to contain or escalate. The workflows below show how analysts approach three common DNS driven scenarios.
+Investigating High NXDOMAIN Rates (Possible DGA or Misconfiguration)
+1.	First — Identify noisy clients in DNS or SIEM logs.
+Look for hosts generating unusually high counts of NXDOMAIN responses compared to peers over the same time window. Group by client IP and response code to find top offenders.
+2.	Then — Examine queried domains and patterns.
+Check whether the failed domains look algorithmic (random looking strings) or obviously mis typed internal names. Many similar, random looking domains under the same TLD or parent suggest DGA activity; repeated typos of internal names suggest configuration issues.
+3.	Escalate or contain based on context.
+If a single endpoint is generating large numbers of algorithmic looking domains and has related endpoint alerts, treat it as suspected malware C2 and isolate or further investigate the host. If failures are tied to recent configuration changes, work with infrastructure teams to correct DNS settings and monitor whether NXDOMAIN rates return to baseline.
+Checking for Possible DNS Tunneling or Data Exfiltration
+1.	First — Flag unusual query sizes and record types.
+In DNS logs, filter for very long subdomains or high volumes of TXT (or other uncommon) record lookups from a single host. Compare the host’s DNS volume to its normal web or application traffic.
+2.	Then — Inspect domains and patterns more closely.
+Look for repeated queries to a small set of domains where only the subdomain portion changes and appears high entropy (random characters). Verify whether those domains are associated with legitimate services or known tunneling frameworks.
+3.	Escalate with supporting evidence.
+If you see long, variable subdomains, high TXT usage, and elevated DNS volume from a host without a good business reason, escalate as suspected DNS tunneling or exfiltration. Provide example log lines, representative domains, and a short summary of volume patterns to incident response, and consider temporary containment (network isolation or egress restrictions) while the endpoint is investigated.
+Validating Suspected DNS Hijacking or Spoofing
+1.	First — Confirm the reported symptom in DNS data.
+Start from the alert or user report (for example, “site looks wrong” or “phishing suspicion”) and check DNS logs for recent A/AAAA and NS lookups for that domain. Note the IPs returned and any recent changes.
+2.	Then — Compare answers across resolvers and expected ranges.
+Resolve the same domain using a trusted external resolver and compare results to your internal resolver’s answers. Check whether current IPs fall within expected address ranges and ASNs for the legitimate service, or if they suddenly point to unfamiliar or high risk networks.
+3.	Escalate and coordinate remediation if hijacking seems likely.
+If the domain’s records now point to unexpected infrastructure, or internal resolvers show poisoned or inconsistent entries, escalate as suspected DNS hijacking or spoofing. Provide concrete examples of before/after DNS answers, affected clients, and timing. Work with infrastructure, domain owners, and, if necessary, external providers to correct records, clear caches, and monitor for further manipulation.
+Conclusion
+DNS provides both attackers and defenders with a rich surface for communication and detection. Understanding its core behaviors—from common record types to encrypted variants—enables SOC analysts to quickly separate legitimate name resolution from malicious patterns like C2 over DNS, tunneling, hijacking, and fast-flux hosting. This knowledge directly improves triage accuracy, reduces noise from benign anomalies, and supports faster escalation to incident response when attacker intent becomes clear.
+Mastering DNS patterns equips analysts to interpret resolver logs, firewall events, endpoint telemetry, and network captures they encounter daily. Those who recognize protocol-specific abuse can pivot more effectively from initial alerts to deeper investigation, correlating DNS signals with endpoint and network data for comprehensive threat validation. This capability proves essential across threat hunting, alert triage, and digital forensics workflows where understanding "who called home to what" often reveals compromise timelines.
+Practical application begins with DNS resolver logs and basic Wireshark captures to build familiarity with normal query patterns. These hands-on exercises develop the baseline judgment needed for SIEM rule tuning and advanced behavioral detection. The logical next topic, IPv4 addressing and subnetting fundamentals, builds on these network concepts to reveal how attackers exploit addressing schemes and network segmentation gaps.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+About this guide:
+Skills: Packet Analysis, Log Analysis, Threat Triage, DNS Monitoring, Wireshark, SIEM
+Target Audience: Entry-Level Cybersecurity | Students | Aspiring SOC Analysts | Early Career Defenders
+For: Building SOC Fundamentals | Beginner Level
+
+
+Tags & Metadata
+#Cybersecurity #SOCAnalyst #BlueTeam #DFIR #EntryLevelCyber
+#Networking #DNS #DNSSecurity #PacketAnalysis #NetworkDetection
+#DNSAbuse #DGAs #DNSTunneling #ThreatDetection
+
+
+
+    
 </body>
