@@ -135,24 +135,30 @@
     <p class="triple-indent"> <strong>•	Stub resolver </strong> OS component on the client that forwards DNS queries for applications.</p>
     <p class="triple-indent"><strong>•	Recursive resolver </strong>– DNS server your client points to (organizational or ISP). It finds answers and caches them.</p>
     <p class="triple-indent"><strong>•	Authoritative name servers </strong>– Servers that hold the official records for a domain (for example, the authoritative servers for example.com).</p>
-
-      High level flow
-1.	Client asks its configured resolver for a record (for example, the A record for www.example.com).
-2.	Resolver checks its cache; if it has a valid answer, it responds immediately.
-3.	If not cached, resolver walks the hierarchy (root → TLD like .com → authoritative server for the domain) to get the answer.
-4.	Resolver returns the answer to the client and caches it for the time to live (TTL).
-As an analyst, you rarely see each hop, but you frequently see the resulting queries and answers in DNS or SIEM logs.
-    Common record types in logs
-•	A / AAAA – Map a name to an IPv4 (A) or IPv6 (AAAA) address.
-•	CNAME – Alias from one name to another (for example, www.example.com → app.example.com).
-•	MX – Mail exchange; where to deliver email for a domain.
-•	NS – Name server; which servers are authoritative for a zone.
-•	TXT – Free form text (SPF/DMARC, verification); can also be abused for tunneling or attacker controlled data.
-    Encrypted DNS and DNSSEC 
-•	DNS over TLS (DoT) – DNS queries/responses carried over a TLS encrypted channel, typically port 853; hides contents from intermediaries and makes tampering detectable.
-•	DNS over HTTPS (DoH) – DNS queries sent inside HTTPS (usually port 443); similar protection to DoT but mixed into normal web traffic, complicating some monitoring and blocking approaches.
-•	DNSSEC – Adds cryptographic signatures so resolvers can verify that responses came from the legitimate authoritative servers and were not modified (for example, cache poisoning). It does not encrypt DNS; it protects authenticity and integrity, not confidentiality.
-For this guide, the key takeaway is: DoT and DoH encrypt DNS in transit; DNSSEC helps you trust that answers are genuine. All three change where and how defenders can observe DNS behavior, but they do not remove DNS as a detection surface.
+ <h4 class="double-indent">High level flow</h4>
+    <ol class="triple-indent">
+        <li class="quad-indent">1.	Client asks its configured resolver for a record (for example, the A record for www.example.com).</li>
+        <li class="quad-indent">2.	Resolver checks its cache; if it has a valid answer, it responds immediately.</li>
+        <li class="quad-indent">3.	If not cached, resolver walks the hierarchy (root → TLD like .com → authoritative server for the domain) to get the answer.</li>
+        <li class="quad-indent">4.	Resolver returns the answer to the client and caches it for the time to live (TTL).</li>
+    </ol>
+    <p class="triple-input">As an analyst, you rarely see each hop, but you frequently see the resulting queries and answers in DNS or SIEM logs.</p>
+    <h4 class="double-indent">Common record types in logs</h4>
+    <ul>
+        <li class="triple-indent">•	A / AAAA – Map a name to an IPv4 (A) or IPv6 (AAAA) address.</li>
+        <li class="triple-indent">•	CNAME – Alias from one name to another (for example, www.example.com → app.example.com).</li>
+        <li class="triple-indent">•	MX – Mail exchange; where to deliver email for a domain.</li>
+        <li class="triple-indent">•	NS – Name server; which servers are authoritative for a zone.</li>
+        <li class="triple-indent">•	TXT – Free form text (SPF/DMARC, verification); can also be abused for tunneling or attacker controlled data.</li>
+    </ul>
+    <h4 class="double-indent">Encrypted DNS and DNSSEC</h4>
+    <ul>
+        <li class="triple-indent">•	DNS over TLS (DoT) – DNS queries/responses carried over a TLS encrypted channel, typically port 853; hides contents from intermediaries and makes tampering detectable.</li>
+        <li class="triple-indent">•	DNS over HTTPS (DoH) – DNS queries sent inside HTTPS (usually port 443); similar protection to DoT but mixed into normal web traffic, complicating some monitoring and blocking approaches.</li>
+        <li class="triple-indent">•	DNSSEC – Adds cryptographic signatures so resolvers can verify that responses came from the legitimate authoritative servers and were not modified (for example, cache poisoning). It does not encrypt DNS; it protects authenticity and integrity, not confidentiality.</li>
+    </ul>
+    <p class="double-indent">For this guide, the key takeaway is: DoT and DoH encrypt DNS in transit; DNSSEC helps you trust that answers are genuine. All three change where and how defenders can observe DNS behavior, but they do not remove DNS as a detection surface.</p>
+        
 
   
 </body>
