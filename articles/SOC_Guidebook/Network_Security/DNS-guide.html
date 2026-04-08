@@ -186,16 +186,17 @@ DNS Server / Resolver Logs</p>
 <p class="double-indent">•	Common findings:</p>
     <ul class="triple-indent">
         <li>High NXDOMAIN rates from a single host (possible DGA or misconfigured tunneling).</li>
-        <li>•	Unusually long or high entropy subdomains under a small number of domains.</li>
+        <li>Unusually long or high entropy subdomains under a small number of domains.</li>
         <li> 	Non DNS infrastructure (like application servers) generating unexpected DNS patterns. </li>
-        <li>•	Practice idea: Export a small sample of resolver logs from a lab or training environment. Count queries per client and per domain, then identify:</li>
-•	            <li class="quad-indent">Top talkers (most querying hosts).</li>
-•	            <li class="quad-indent">Domains with the most NXDOMAIN responses.</li>
-•	            <li class="quad-indent">Any domains with very long subdomains.</li>
+        <li>Practice idea: Export a small sample of resolver logs from a lab or training environment. Count queries per client and per domain, then identify:</li>
+	            <li class="quad-indent">Top talkers (most querying hosts).</li>
+	            <li class="quad-indent">Domains with the most NXDOMAIN responses.</li>
+	            <li class="quad-indent">Any domains with very long subdomains.</li>
     </ul>
-SIEM and Log Correlation
-At scale, DNS is usually analyzed through a centralized log platform that aggregates events from resolvers, firewalls, endpoints, and threat feeds. This lets analysts spot abnormal DNS behavior in context.
-•	Common detection use cases:
+    <h3>SIEM and Log Correlation</h3>
+<p class="first-line-indent">At scale, DNS is usually analyzed through a centralized log platform that aggregates events from resolvers, firewalls, endpoints, and threat feeds. This lets analysts spot abnormal DNS behavior in context.</p>
+<ul class="single-indent">
+    <li>Common detection use cases:</li>
 •	DGA / suspicious domain rules: high NXDOMAIN counts, algorithmic looking names, or sudden spikes in rare domains.
 •	Tunneling detection: excessive TXT lookups, long subdomains, or high query volume from a single host.
 •	Policy evasion: internal hosts sending DNS directly to public resolvers instead of approved internal resolvers.
@@ -203,28 +204,31 @@ At scale, DNS is usually analyzed through a centralized log platform that aggreg
 •	“Top 10 clients by NXDOMAIN count.”
 •	“Domains with more than N distinct subdomains queried in 24 hours.”
 Review results and flag any entries that do not match expected business use.
-Packet Captures and Protocol Analysis (Wireshark or Similar)
-Packet captures provide the full DNS wire view, including query/response sizes, flags, and transport details. They are especially useful when investigating suspected tunneling, spoofing, or protocol misuse.
-•	Key views:
-•	Filter on udp.port == 53 || tcp.port == 53 to see traditional DNS traffic.
-•	Inspect query names, response codes, and lengths of individual labels (subdomains).
-•	Look at TCP usage for DNS (zone transfers, DoT tunnels terminating locally).
-•	Common findings:
-•	Single hosts generating DNS queries far larger or more frequent than typical clients.
-•	Clear text DNS carrying long, encoded strings in subdomains or TXT records.
-•	Signs of spoofing or hijacking (unexpected source IPs for responses, mismatched transaction IDs).
-•	Practice idea: Capture DNS traffic while performing normal browsing, then compare with a public DNS tunneling PCAP from a training source. Identify:
-•	How normal query/response sizes and subdomain lengths look.
-•	How tunneling traffic stands out in label length and frequency.
-Endpoint / EDR Telemetry
-Endpoint tools can often link DNS queries back to the processes that generated them, which is critical for narrowing down suspicious DNS activity to specific binaries or scripts.
-•	Useful signals:
-•	Which executable initiated a suspicious DNS query (browser vs unknown process).
-•	Whether the same process also made unusual network connections or file changes.
-•	Correlation between process start times and bursts of odd DNS requests.
-•	Practice idea: On a lab endpoint with monitoring enabled, generate DNS queries using a browser, a command line tool (like nslookup or dig), and a simple script. Compare how each appears in the endpoint logs and note which fields tie the DNS activity back to a specific process.
-Configuration and Control (Resolvers and Firewalls)
-While this guide is focused on detection, analysts should understand where control points exist for DNS.
+</ul>
+    <h3>Packet Captures and Protocol Analysis (Wireshark or Similar)</h3>
+<p class="first-line-indent">Packet captures provide the full DNS wire view, including query/response sizes, flags, and transport details. They are especially useful when investigating suspected tunneling, spoofing, or protocol misuse.</p>
+    <ul class="single-indent">	
+        <li>Key views:</li>
+            <li class="double-indent">Filter on udp.port == 53 || tcp.port == 53 to see traditional DNS traffic.</li>
+            <li>Inspect query names, response codes, and lengths of individual labels (subdomains).</li>
+            <li>Look at TCP usage for DNS (zone transfers, DoT tunnels terminating locally).</li>
+        <li>Common findings:</li>
+            <li class="triple-indent"> Single hosts generating DNS queries far larger or more frequent than typical clients.</li>
+            <li class="triple-indent"> Clear text DNS carrying long, encoded strings in subdomains or TXT records.</li>
+            <li class="triple-indent"> Signs of spoofing or hijacking (unexpected source IPs for responses, mismatched transaction IDs).</li>
+            <li class="triple-indent"> <em>Practice idea:</em> Capture DNS traffic while performing normal browsing, then compare with a public DNS tunneling PCAP from a training source. Identify:</li>
+                <li class="quad-indent"> How normal query/response sizes and subdomain lengths look.</li>
+                <li class="quad-indent"> How tunneling traffic stands out in label length and frequency.</li>
+<h3>Endpoint / EDR Telemetry</h3>
+<p class="first-line-indent">Endpoint tools can often link DNS queries back to the processes that generated them, which is critical for narrowing down suspicious DNS activity to specific binaries or scripts.</p>
+    <ul>
+    <li class="single-indent">Useful signals:</li>
+        <li class="double-indent">Which executable initiated a suspicious DNS query (browser vs unknown process).</li>
+        <li class="double-indent">Whether the same process also made unusual network connections or file changes.</li>
+        <li class="double-indent">Correlation between process start times and bursts of odd DNS requests.</li>
+<li class="single-indent"><em>Practice idea:</em> On a lab endpoint with monitoring enabled, generate DNS queries using a browser, a command line tool (like nslookup or dig), and a simple script. Compare how each appears in the endpoint logs and note which fields tie the DNS activity back to a specific process.</li>
+<h3>Configuration and Control (Resolvers and Firewalls)</h3>
+<p class="first-line-indent">While this guide is focused on detection, analysts should understand where control points exist for DNS.</p>
 •	Resolver level controls:
 •	Blocking or redirecting known malicious domains.
 •	Enforcing use of internal resolvers instead of public ones.
@@ -232,16 +236,18 @@ While this guide is focused on detection, analysts should understand where contr
 •	Network level controls:
 •	Limiting outbound DNS to approved resolvers.
 •	Detecting and blocking unauthorized DoH endpoints where policy requires visibility.
-•	Practice idea: In a lab environment, configure a firewall rule to only allow DNS to your internal resolver, then attempt to send DNS directly to an external resolver or DoH endpoint. Observe how the logs record the blocked attempts and how that would appear to a SOC analyst.
-SOC Analyst Perspective
-SOC triage for DNS focuses on spotting abnormal name resolution patterns, validating whether they map to attacker behaviors, and deciding when to contain or escalate. The workflows below show how analysts approach three common DNS driven scenarios.
-Investigating High NXDOMAIN Rates (Possible DGA or Misconfiguration)
-1.	First — Identify noisy clients in DNS or SIEM logs.
-Look for hosts generating unusually high counts of NXDOMAIN responses compared to peers over the same time window. Group by client IP and response code to find top offenders.
-2.	Then — Examine queried domains and patterns.
-Check whether the failed domains look algorithmic (random looking strings) or obviously mis typed internal names. Many similar, random looking domains under the same TLD or parent suggest DGA activity; repeated typos of internal names suggest configuration issues.
-3.	Escalate or contain based on context.
-If a single endpoint is generating large numbers of algorithmic looking domains and has related endpoint alerts, treat it as suspected malware C2 and isolate or further investigate the host. If failures are tied to recent configuration changes, work with infrastructure teams to correct DNS settings and monitor whether NXDOMAIN rates return to baseline.
+•	<em>Practice idea:</em> In a lab environment, configure a firewall rule to only allow DNS to your internal resolver, then attempt to send DNS directly to an external resolver or DoH endpoint. Observe how the logs record the blocked attempts and how that would appear to a SOC analyst.
+<h2>SOC Analyst Perspective</h2>
+    <p class="first-line-indent">SOC triage for DNS focuses on spotting abnormal name resolution patterns, validating whether they map to attacker behaviors, and deciding when to contain or escalate. The workflows below show how analysts approach three common DNS driven scenarios.</p>
+    <p class="single-indent">Investigating High NXDOMAIN Rates (Possible DGA or Misconfiguration)</p>
+    <ol>
+        <li class="double-indent">First — Identify noisy clients in DNS or SIEM logs.</li>
+        <p class="double-indent">Look for hosts generating unusually high counts of NXDOMAIN responses compared to peers over the same time window. Group by client IP and response code to find top offenders.</p>
+        <li class="double-indent">Then — Examine queried domains and patterns.</li>
+        <p class="double-indent">Check whether the failed domains look algorithmic (random looking strings) or obviously mis typed internal names. Many similar, random looking domains under the same TLD or parent suggest DGA activity; repeated typos of internal names suggest configuration issues.</p>
+        <li class="double-indent">Escalate or contain based on context.</li>
+        <p class="double-indent">If a single endpoint is generating large numbers of algorithmic looking domains and has related endpoint alerts, treat it as suspected malware C2 and isolate or further investigate the host. If failures are tied to recent configuration changes, work with infrastructure teams to correct DNS settings and monitor whether NXDOMAIN rates return to baseline.</p>
+    </ol>
 Checking for Possible DNS Tunneling or Data Exfiltration
 1.	First — Flag unusual query sizes and record types.
 In DNS logs, filter for very long subdomains or high volumes of TXT (or other uncommon) record lookups from a single host. Compare the host’s DNS volume to its normal web or application traffic.
