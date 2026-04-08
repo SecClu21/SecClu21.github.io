@@ -241,8 +241,8 @@ Review results and flag any entries that do not match expected business use.
     <p class="first-line-indent">SOC triage for DNS focuses on spotting abnormal name resolution patterns, validating whether they map to attacker behaviors, and deciding when to contain or escalate. The workflows below show how analysts approach three common DNS driven scenarios.</p>
     <p class="single-indent">Investigating High NXDOMAIN Rates (Possible DGA or Misconfiguration)</p>
     <ol>
-        <li class="double-indent">First — Identify noisy clients in DNS or SIEM logs.</li>
-        <p class="double-indent">Look for hosts generating unusually high counts of NXDOMAIN responses compared to peers over the same time window. Group by client IP and response code to find top offenders.</p>
+        <li class="double-indent">First — Identify noisy clients in DNS or SIEM logs.
+        <br class="double-indent">Look for hosts generating unusually high counts of NXDOMAIN responses compared to peers over the same time window. Group by client IP and response code to find top offenders.</li>
         <li class="double-indent">Then — Examine queried domains and patterns.</li>
         <p class="double-indent">Check whether the failed domains look algorithmic (random looking strings) or obviously mis typed internal names. Many similar, random looking domains under the same TLD or parent suggest DGA activity; repeated typos of internal names suggest configuration issues.</p>
         <li class="double-indent">Escalate or contain based on context.</li>
