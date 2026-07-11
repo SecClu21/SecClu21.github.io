@@ -1,77 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOC Guidebook</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 40px 20px;
-            line-height: 1.6;
-            color: #222;
-            background: #f9fafb;
-        }
-        h1 {
-            color: #1a3c5e;
-            margin-bottom: 10px;
-        }
-        p.subtitle {
-            color: #555;
-            margin-top: 0;
-            margin-bottom: 30px;
-        }
-        h2 {
-            color: #2c5282;
-            margin-top: 30px;
-            margin-bottom: 10px;
-        }
-        ul {
-            list-style-type: none;
-            padding-left: 0;
-        }
-        li {
-            margin: 12px 0;
-        }
-        a {
-            color: #1a3c5e;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        .card {
-            background: white;
-            border: 1px solid #d9e2ec;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-        }
-    </style>
+
+    <title>SOC Guidebook | Bits, Bytes & Security</title>
+
+    <link rel="stylesheet" href="../style.css">
 </head>
+
+
 <body>
 
-    <h1>SOC Guidebook</h1>
-    <p class="subtitle">A growing collection of beginner-friendly cybersecurity articles for SOC, DFIR, and blue team learning.</p>
+    <!-- Navigation -->
+    <header>
 
-    <div class="card">
-        <h2>Network Security</h2>
-        <ul>
-            <li>
-                <a href="https://secclu21.github.io/articles/SOC_Guidebook/Network_Security/tcp-udp-guide.html">
-                    TCP vs UDP: What Analysts Detect in Network Traffic
+        <nav>
+
+            <div class="site-title">
+                <a href="../index.html">
+                    Bits, Bytes & Security
                 </a>
-            </li>
-           <li>
-    <!-- <a href="https://secclu21.github.io/articles/SOC_Guidebook/Network_Security/DNS-guide.html"> -->
-        DNS in the SOC: From Name Resolution to Detection Opportunities
-    <!-- </a> -->
-</li>
-        </ul>
-    </div>
+            </div>
+
+            <ul class="navigation-links">
+                <li><a href="../index.html">Home</a></li>
+               <!-- <li><a href="../articles.html">Articles</a></li>
+                <li><a href="../about.html">About</a></li>
+            </ul>
+-->
+        </nav>
+
+    </header>
+
+
+
+    <!-- SOC Guidebook Introduction -->
+    <main>
+
+        <section class="series-header">
+
+            <h1>
+                SOC Guidebook
+            </h1>
+
+            <p>
+                The SOC Guidebook is a collection of technical field notes
+                exploring foundational concepts, tools, and workflows
+                relevant to security operations. This series documents my
+                exploration of topics that build toward understanding how
+                security analysts monitor, investigate, and respond to
+                activity within an environment.
+            </p>
+
+        </section>
+
+
+
+        <!-- Article List -->
+        <section class="article-list">
+
+            <h2>
+                Articles
+            </h2>
+
+
+            <ol>
+
+                <li>
+                    <a href="https://secclu21.github.io/articles/SOC_Guidebook/Network_Security/tcp-udp-guide.html">
+                        TCP vs UDP: What Analysts Detect in Network Traffic
+                    </a>
+
+                    <p>
+                        Exploring the differences between TCP and UDP,
+                        how these protocols appear in network traffic,
+                        and why they matter from a security monitoring
+                        perspective.
+                    </p>
+                </li>
+
+
+                <li>
+                    <a href="https://secclu21.github.io/articles/SOC_Guidebook/Network_Security/DNS-guide.html">
+                        DNS: Understanding the Protocol Behind Domain Resolution
+                    </a>
+
+                    <p>
+                        Exploring how DNS works, why it matters to security
+                        analysts, and how DNS activity can provide insight
+                        during investigations.
+                    </p>
+                </li>
+
+<!--
+                <li>
+                    <a href="#">
+                        Future Article
+                    </a>
+
+                    <p>
+                        Upcoming SOC Guidebook topic.
+                    </p>
+                </li>
+
+-->
+            </ol>
+
+
+        </section>
+
+    </main>
+
+
+
+    <!-- Footer -->
+    <footer>
+
+        <p>
+            Bits, Bytes & Security
+        </p>
+
+        <p>
+            Contact:
+            <a href="https://www.linkedin.com/in/carlalewis19/" target="_blank" rel="noopener noreferrer">
+                LinkedIn
+            </a>
+        </p>
+
+        <p>
+            © 2026 Bits, Bytes & Security. All rights reserved.
+        </p>
+
+    </footer>
+
 
 </body>
+
 </html>
