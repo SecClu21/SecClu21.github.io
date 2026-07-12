@@ -334,7 +334,7 @@
                         while restricting other protocols. Because DNS is widely trusted and essential to normal operations, this 
                         technique can be difficult to detect without careful analysis of DNS activity.
                     <p>
-                        <strong>Patterns: Attackers typically encode data within subdomains or DNS record data, most commonly using 
+                        <strong>Patterns: </strong>Attackers typically encode data within subdomains or DNS record data, most commonly using 
                         TXT records, although other record types may also be abused. Successful tunneling often generates 
                         unusually long or high-entropy subdomains, frequent queries to the same domain with constantly changing 
                         subdomains, and a sustained volume of DNS requests that is inconsistent with normal name resolution.
@@ -460,7 +460,27 @@
                     resolution typically precedes connections to domain-based services, resolver logs frequently 
                     provide some of the earliest evidence of suspicious activity.
                 </p>
-                
+                <p>
+                    <strong>
+                        Key Information:
+                    </strong>
+                </p>
+                <ul>
+                    <li>
+                        <strong> Client IP or hostname – 
+                        </strong> 
+                        Identifies the system making the DNS request. 
+                    </li>
+                    <li>
+                        <strong> Query name (domain) – </strong> Shows which domain the client attempted to resolve.
+                    </li>
+                    <li>
+                        <strong>
+                            Record type 
+                        </strong>
+                        (A, AAAA, MX, TXT, etc.) - Indicates the type of DNS information requested. 
+                    </li>
+                </ul>
             </section>
 
 
