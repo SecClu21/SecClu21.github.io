@@ -219,7 +219,248 @@
             <section class="article-content">
 
                 <!-- DNS article goes here -->
+                <h2>
+                    Introduction
+                </h2>
 
+                   <p>
+                       Domain Name System (DNS) is often described as the “phone book” of the internet,
+                       mapping human friendly domain names to IP addresses so clients can find resources 
+                       across networks. This naming layer is what allows users to type example.com 
+                       instead of memorizing IPs and still reach web servers, APIs, or internal 
+                       applications. When DNS was originally designed, its creators did not anticipate 
+                       modern attackers abusing its open, unauthenticated nature, or defenders trying 
+                       to monitor it for subtle signs of compromise.
+                   </p>
+                   
+                    <p>
+                        As environments grew more complex, DNS became deeply embedded in how operating 
+                        systems, applications, and services discover each other. Today, adversaries misuse 
+                        DNS for command and control (C2) communication, data exfiltration, phishing 
+                        infrastructure, and domain generation algorithms (DGAs), while defenders treat DNS 
+                        logs and traffic patterns as a critical source of detection signals. At the same 
+                        time, DNS is essential to normal network operations and cannot simply be blocked or 
+                        disabled, which makes understanding normal behavior—and how attackers twist 
+                        it—especially important for early career defenders.
+                    </p>
+                    
+                    <p>
+                        Security enhancements like DNS over TLS (DoT), DNS over HTTPS (DoH), and DNS Security 
+                        Extensions (DNSSEC) were introduced to protect different parts of the DNS ecosystem, 
+                        but they do not replace the need to understand plain DNS behavior. This guide takes a 
+                        practical view of DNS from a defender’s perspective, connecting core concepts to common 
+                        abuse patterns and the kinds of evidence you will see in logs and network data during 
+                        real investigations.
+                    </p> 
+                
+                <h2>
+                    What DNS Is
+                </h2>
+                    <p>DNS functions as a naming and lookup service for modern networks. Because name resolution 
+                        typically occurs before a connection is established, DNS requests reveal what a system is 
+                        attempting to locate, even if the subsequent connection never occurs. This ability to 
+                        expose intended destinations makes DNS an important source of context during 
+                        investigations and threat hunting. To understand why DNS provides this visibility, it 
+                        helps to first understand how DNS resolution works.
+                    </p>
+
+                <h2>
+                    How DNS Works
+                </h2>
+                    <p>
+                        When an application needs to communicate with a resource identified by a domain name, it 
+                        first checks whether the requested information is already available in a local cache. If 
+                        no valid cached entry exists, the system sends a query to a configured DNS resolver, which 
+                        may answer from its own cache or perform additional lookups before returning a response. 
+                        Once the requested information is received, the client can use it to establish a connection 
+                        to the destination service.
+                    </p>
+                    <p>
+                        The returned records are typically cached according to their Time to Live (TTL) values to 
+                        reduce the number of repeated queries. Although this process usually occurs in the background 
+                        and takes only milliseconds, it generates a series of requests and responses that can be 
+                        recorded in DNS logs, packet captures, and other network telemetry. For defenders, these 
+                        records provide visibility into what systems attempted to locate, when the requests occurred, 
+                        how often they were made, and whether the responses appear consistent with expected behavior.
+
+                    </p>
+
+                <h2>
+                    DNS Attack Patterns and Indicators
+                </h2>
+                    <p>
+                        Most DNS traffic in an environment is legitimate, which makes understanding normal behavior an 
+                        important part of DNS analysis. Rather than focusing on individual queries in isolation, analysts 
+                        often look for patterns across hosts, domains, timing, record types, and response behavior. The 
+                        examples below highlight common ways attackers abuse DNS and the indicators defenders can use to 
+                        identify activity that warrants further investigation.
+                    </p>
+
+                    <h3>
+                        Malware C2 Over DNS
+                    </h3>
+                        <p>
+                           Some malware abuses DNS as part of its command-and-control (C2) communications to locate 
+                            attacker-controlled infrastructure or exchange information with it. Because DNS is essential to 
+                            normal network operations and generates a constant stream of legitimate traffic, malicious DNS 
+                            activity can blend into expected network behavior, making it more difficult to identify than 
+                            attacks that rely on less common protocols.
+                        </p>
+                        <p>
+                            <strong>Patterns:</strong> Malware may periodically resolve domains associated with its C2 
+                            infrastructure before establishing a connection or, in more advanced cases, use DNS queries and 
+                            responses themselves as a covert communication channel. These lookups often blend with normal name 
+                            resolution activity and may involve algorithmically generated domain names (DGAs), rapidly changing 
+                            subdomains, or repeated queries to the same destination.
+                        </p>
+                        <p>
+                            <strong>Indicators:</strong> Repeated DNS queries from a single host to algorithmic-looking domains, 
+                            bursts of NXDOMAIN responses before a successful resolution, or DNS requests occurring at regular 
+                            intervals regardless of user activity may indicate beaconing behavior. Analysts should also look for 
+                            unusually frequent DNS requests, repeated queries for uncommon record types, and endpoint telemetry 
+                            that correlates suspicious processes with the observed DNS activity. While none of these indicators 
+                            alone confirms malicious activity, multiple indicators occurring together can significantly increase 
+                            confidence that the system is communicating with attacker-controlled infrastructure.
+ 
+                        </p>
+
+                <h3>
+                    DNS Tunneling and Data Exfiltration
+                </h3>
+                    <p>
+                        DNS tunneling abuses the DNS protocol as a communication channel rather than simply using it to resolve 
+                        domain names. Instead of carrying only legitimate DNS requests, attackers encode commands or stolen data
+                        within DNS queries and responses, allowing information to pass through systems that may permit DNS traffic 
+                        while restricting other protocols. Because DNS is widely trusted and essential to normal operations, this 
+                        technique can be difficult to detect without careful analysis of DNS activity.
+                    <p>
+                        <strong>Patterns: Attackers typically encode data within subdomains or DNS record data, most commonly using 
+                        TXT records, although other record types may also be abused. Successful tunneling often generates 
+                        unusually long or high-entropy subdomains, frequent queries to the same domain with constantly changing 
+                        subdomains, and a sustained volume of DNS requests that is inconsistent with normal name resolution.
+                    <p>
+                        <strong>Indicators:</strong> Very long subdomain labels containing random-looking or encoded characters, an 
+                        unusually high number of TXT or other uncommon record type queries from a single host, and DNS query volumes
+                        that are disproportionately large compared to the system's normal activity may indicate tunneling. Resolver 
+                        logs showing repeated requests to the same domain with constantly changing subdomains, particularly when 
+                        combined with endpoint or network telemetry, provide strong evidence that DNS is being used as a covert 
+                        communication channel.
+
+                    </p>
+                            
+                <h3>
+                    DNS Hijacking and Spoofing
+                </h3>
+                    <p>
+                        DNS hijacking and spoofing manipulate the DNS resolution process so that users are directed to 
+                        attacker-controlled infrastructure instead of the legitimate destination. Rather than abusing 
+                        DNS as a communication channel, these techniques alter or falsify DNS information to redirect 
+                        traffic, intercept communications, or facilitate phishing and credential theft. Because users 
+                        often enter the correct domain name, these attacks can be difficult to recognize without 
+                        examining DNS activity.
+                    </p>
+                    <p>
+                        <strong>Patterns:</strong> Attackers may compromise DNS resolvers, poison DNS caches, spoof DNS 
+                        responses, or modify authoritative DNS records to return malicious IP addresses for legitimate 
+                        domains. Depending on the attack, victims may be redirected to phishing pages, malware-hosting 
+                        infrastructure, or attacker-controlled servers that closely resemble the intended destination.4
+                    </p>
+                    <p>
+                        <strong>Indicators:</strong> DNS responses for well-known domains resolving to unexpected IP ranges,
+                        sudden changes in NS, A, or other critical DNS records, and inconsistent responses between trusted 
+                        resolvers may indicate DNS manipulation. User reports of legitimate websites appearing unusual, 
+                        unexpected certificate warnings, or authentication failures combined with DNS logs showing new or 
+                        unfamiliar IP addresses for those domains are strong indicators that DNS hijacking or spoofing should 
+                        be investigated.
+
+                    </p>
+
+                <h3>
+                    Fast Flux and Dynamic Hosting
+                </h3>
+                    <p>
+                        Fast Flux is a technique used by attackers to increase the resilience of malicious infrastructure by 
+                        rapidly changing the IP addresses associated with a domain. Rather than relying on a single server, the 
+                        attacker distributes services across many compromised or attacker-controlled systems, making it more 
+                        difficult for defenders to block, disrupt, or take down the infrastructure. This approach is commonly 
+                        used to support phishing campaigns, malware distribution, and command-and-control infrastructure.
+                    <p>
+                        <strong>Patterns:</strong> A single domain rapidly cycles through many different IP addresses, often 
+                        spanning multiple networks, ISPs, or geographic regions. DNS responses typically use short TTL values 
+                        to force clients and resolvers to request updated records more frequently, allowing the attacker to 
+                        continually rotate the infrastructure behind the domain.
+                    </p>
+                    <p>
+                        <strong>Indicators:</strong> DNS logs showing a domain resolving to numerous IP addresses within a short period of 
+                            time, consistently low TTL values, and IPs associated with previously identified malicious infrastructure 
+                            may indicate Fast Flux activity. Domains linked to phishing or malware that exhibit continuous IP rotation, 
+                            particularly across multiple autonomous systems or geographic locations, are strong indicators that the 
+                            infrastructure is intentionally designed to resist detection and takedown efforts.                
+                    </p>
+
+                <h3>
+                    Suspicious Use of TXT and Other Uncommon Records
+                </h3>
+                    <p>
+                        Most DNS record types serve legitimate purposes, and TXT records are widely used to support services such as SPF, 
+                        DKIM, domain verification, and other application configurations. However, because TXT records can store arbitrary 
+                        text, attackers may abuse them to distribute malware configuration data, encryption keys, command-and-control 
+                        instructions, or other information. Less frequently used record types may also be abused to conceal data or evade 
+                        detection by blending into normal DNS activity.
+                    </p>
+                    <p>
+                        <strong>Patterns:</strong> Attackers may use TXT records to retrieve encoded data, malware configuration, or commands
+                        without relying on traditional web traffic. Other uncommon record types may be abused in similar ways, particularly 
+                        when the information being exchanged does not fit normal DNS behavior or appears unrelated to the domain's expected 
+                        purpose.
+                    </p>
+                    <p><strong>Indicators:</strong> An unusually high volume of TXT or other uncommon record type queries from a single host,
+                        repeated lookups to the same domains for TXT records outside of expected email or service configuration activity, or 
+                        TXT responses containing unusually large or encoded-looking data may warrant investigation. When these patterns are 
+                        accompanied by suspicious processes, beaconing behavior, or other anomalous DNS activity, they may indicate malware 
+                        using DNS to retrieve or exchange information.
+                    </p>
+
+                <h3>
+                    Anomalous Resolver Usage and Exfiltration via External Resolvers
+                </h3>
+                    <p>
+                        Organizations typically configure systems to use internal DNS resolvers so that DNS activity can be monitored, 
+                        logged, filtered, and managed according to security policies. Attackers may attempt to bypass these controls by
+                        sending DNS requests directly to external public resolvers or attacker-controlled DNS infrastructure. Doing so 
+                        can reduce an organization's visibility into malicious activity while enabling command-and-control 
+                        communications, data exfiltration, or access to malicious domains.
+                    </p>
+                     <p>
+                         <strong>Patterns:</strong> Compromised hosts may send DNS queries directly to external recursive resolvers instead 
+                         of the organization's designated DNS servers. Attackers may also leverage encrypted DNS protocols, 
+                         attacker-controlled resolvers, or non-standard communication paths to evade DNS logging, filtering, and monitoring 
+                         while continuing to resolve malicious infrastructure.
+                    </p>
+                            
+                    <p>
+                        <strong>Indicators:</strong> Internal endpoints making DNS requests directly to external resolver IP addresses 
+                        instead of the organization's approved recursive resolvers may indicate attempts to bypass security controls. 
+                        DNS traffic using unexpected ports, encrypted DNS services such as DNS over HTTPS (DoH), or resolver destinations 
+                        that deviate from established baselines should be investigated. When combined with unusual query volumes, suspicious 
+                        domains, or other DNS anomalies, these behaviors may indicate attempts to evade internal monitoring or facilitate 
+                        command-and-control communications and data exfiltration.
+                    </p>
+           
+                            
+            <h2>
+                Analysis and Practical Exercises
+            </h2>
+                <p>
+                    Once suspicious DNS activity has been identified, DNS server and resolver logs are often
+                    the first source analysts examine because they provide a centralized record of how 
+                    systems resolve domain names. These logs capture who made the request, what was requested,
+                    and how the resolver responded, allowing analysts to identify unusual patterns before 
+                    pivoting to other data sources such as packet captures or endpoint telemetry. Because DNS 
+                    resolution typically precedes connections to domain-based services, resolver logs frequently 
+                    provide some of the earliest evidence of suspicious activity.
+                </p>
+                
             </section>
 
 
