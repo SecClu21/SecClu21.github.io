@@ -465,24 +465,375 @@
                         Key Information:
                     </strong>
                 </p>
-                <ul>
-                    <li>
-                        <strong> Client IP or hostname – 
-                        </strong> 
-                        Identifies the system making the DNS request. 
-                    </li>
-                    <li>
-                        <strong> Query name (domain) – </strong> Shows which domain the client attempted to resolve.
-                    </li>
-                    <li>
-                        <strong>
-                            Record type 
-                        </strong>
-                        (A, AAAA, MX, TXT, etc.) - Indicates the type of DNS information requested. 
-                    </li>
-                </ul>
-            </section>
+                    <ul>
+                        <li>
+                            <strong> 
+                                Client IP or hostname – 
+                            </strong> 
+                                Identifies the system making the DNS request. 
+                        </li>
+                        <li>
+                            <strong> 
+                                Query name (domain) – 
+                            </strong> 
+                                Shows which domain the client attempted to resolve.
+                        </li>
+                        <li>
+                            <strong>
+                                Record type (A, AAAA, MX, TXT, etc.) -
+                            </strong> 
+                                Indicates the type of DNS information requested. 
+                        </li>
+                        <li>
+                            <strong>
+                                Response code (NOERROR, NXDOMAIN, SERVFAIL, etc.) – 
+                            </strong>
+                                Shows whether the lookup succeeded or failed. 
+                        </li>
+                        <li>
+                            <strong>
+                                Returned IP address(es) – 
+                            </strong>
+                                Identifies the destination provided by the resolver. 
+                        </li>
+                    </ul>
+                <p>
+                    <strong>
+                        Common Findings:
+                    </strong>
+                </p>
+                    <ul>
+                        <li>
+                            High NXDOMAIN rates from a single host, which may indicate
+                            a domain generation algorithm (DGA), malware, or a 
+                            misconfigured application. 
+                        </li>
+                        <li>
+                            Unusually long or high-entropy subdomains that may suggest 
+                            DNS tunneling or encoded data.
+                        </li>
+                        <li>
+                            Unexpected DNS activity originating from systems that 
+                            normally generate little or no DNS traffic. 
+                        </li>
+                        <li>
+                            Repeated lookups for suspicious domains, uncommon record
+                            types, or rapidly changing subdomains. 
+                        </li>
+                    </ul>
+                <p>
+                    <strong>
+                        Skill Builder:
+                    </strong>
+                         Use nslookup or dig to resolve several common websites and 
+                    compare the results for different record types, such as A, AAAA, 
+                    MX, or TXT records. Before examining any logs, consider what DNS 
+                    activity you would expect these lookups to generate. If you have 
+                    access to DNS logs through a home router, Pi-hole, DNS server, 
+                    home lab, or public sample dataset, compare your expectations with 
+                    the recorded activity. If DNS logs are unavailable, use Wireshark 
+                    to observe the same queries and responses. Focus on recognizing 
+                    what normal DNS activity looks like before trying to identify 
+                    suspicious behavior.
+                </p>
 
+                
+            <h3>
+                SIEM and Log Correlation
+            </h3>
+                <p>
+                    A Security Information and Event Management (SIEM) platform 
+                    centralizes logs from multiple sources, allowing analysts to 
+                    view DNS activity alongside firewall events, endpoint telemetry, 
+                    authentication logs, threat intelligence, and other security 
+                    data. Rather than investigating DNS in isolation, analysts use 
+                    SIEMs to correlate related events, identify broader attack 
+                    patterns, and prioritize alerts based on the available evidence. 
+                    This ability to combine multiple data sources makes SIEMs one of 
+                    the primary tools used during SOC investigations.
+                </p>
+                <p>
+                    <strong>
+                        Key Information:
+                    </strong>
+                </p>
+                    <ul>
+                        <li>
+                            <strong>
+                                DNS queries and responses – 
+                            </strong>
+                                Shows which domains were requested, by whom, and when.
+                        </li>
+                        <li>
+                            <strong>
+                                Host and user context –
+                            </strong>
+                                Associates DNS activity with specific systems and users.
+                        </li>
+                        <li>
+                            <strong>
+                                Correlated security events – 
+                            </strong>
+                                Connects DNS activity with endpoint alerts, firewall 
+                                logs, authentication events, and other telemetry. 
+                        </li>
+                        <li>
+                            <strong>
+                                Threat intelligence matches – 
+                            </strong>
+                                Identifies domains or IP addresses associated with 
+                                known malicious infrastructure. 
+                        </li>
+                        <li>
+                            <strong>
+                                Historical searches – 
+                            </strong>
+                                Allows analysts to review past activity and 
+                                identify trends over time. 
+                        </li>                 
+                    </ul>
+                <p>
+                    <strong>
+                        Common Findings:
+                    </strong>
+                </p>
+                    <ul>
+                        <li>
+                            High NXDOMAIN rates or algorithmically generated 
+                            domain names that may indicate a domain generation 
+                            algorithm (DGA). 
+                        </li>
+                        <li>
+                            Excessive TXT or other uncommon record type lookups
+                            that could suggest DNS tunneling or malware 
+                            configuration retrieval. 
+                        </li>
+                        <li> 
+                            Internal systems sending DNS requests directly to 
+                            external resolvers instead of approved organizational 
+                            DNS servers.
+                        </li>
+                        <li>
+                            Multiple hosts communicating with the same suspicious 
+                            domain, indicating a potentially broader compromise. 
+                        </li>
+                    </ul>
+                <p>
+                   <strong>
+                       Skill Builder:
+                   </strong>
+                        Think about the information you would need to investigate 
+                    a suspicious domain. Besides DNS logs, what other evidence would 
+                    help you determine whether the activity is legitimate or malicious?
+                    Make a list of the data sources you would want to examine—such as 
+                    endpoint telemetry, firewall logs, authentication events, or threat
+                    intelligence—and briefly explain what question each source could 
+                    answer. This exercise helps build the habit of correlating multiple 
+                    sources of evidence rather than relying on a single log. 
+                </p>
+
+            <h3>
+                 Packet Captures and Protocol Analysis
+            </h3>
+                <p>
+                    Packet captures (PCAPs) provide a detailed view of DNS traffic 
+                    as it travels across the network, allowing analysts to examine 
+                    individual queries, responses, protocol fields, and transport 
+                    details. Analysts commonly review packet captures using tools 
+                    such as Wireshark for interactive analysis or TShark for 
+                    command-line filtering and scripting, although many packet 
+                    analysis tools provide similar capabilities. While DNS logs 
+                    summarize resolver activity, packet captures record the actual 
+                    network communication, allowing analysts to validate suspicious 
+                    behavior observed in logs or a SIEM. They are particularly 
+                    valuable when investigating DNS tunneling, spoofing, protocol 
+                    anomalies, or other situations where understanding the contents of 
+                    DNS traffic is important.
+                </p>
+                <p>
+                    <strong>
+                        Key Information:
+                    </strong>
+                </p>
+                    <ul>
+                        <li>
+                            <strong>
+                                Query and response details –
+                            </strong>
+                                View the complete DNS request and response, 
+                            including queried domains, returned records, and
+                            response codes.
+                        </li>
+                        <li>
+                            <strong>
+                                Protocol fields – 
+                            </strong>
+                                Examine DNS flags, transaction IDs, recursion 
+                                settings, and other header information.
+                        </li>
+                        <li>
+                            <strong>
+                                Transport details – 
+                            </strong>
+                                Determine whether DNS is using UDP or TCP while 
+                                observing packet sizes, timing, and communication 
+                                patterns.
+                        </li>
+                        <li>
+                            <strong>
+                                Query structure – 
+                            </strong>
+                                Analyze subdomain length, record types, and other 
+                                characteristics that may indicate suspicious activity.
+                        </li>
+                    </ul>
+                <p>
+                    <strong>
+                        Common Findings:
+                    </strong>    
+                </p>
+                    <ul>
+                        <li>
+                            Unusually long or high-entropy subdomains that may
+                            indicate DNS tunneling or encoded data.
+                        </li>
+                        <li>
+                            DNS queries or responses that are significantly 
+                            larger or more frequent than expected for normal
+                            client activity.
+                        </li>
+                        <li> 
+                            Signs of spoofing or manipulation, such as unexpected 
+                            response sources or mismatched transaction IDs.
+                        </li>
+                        <li>
+                            DNS traffic using TCP for activities such as zone 
+                            transfers or unusually large DNS responses.
+                        </li>
+                    </ul>
+                <p>
+                    <strong>
+                        Skill Builder:
+                    </strong>
+                        Consider what happens after an application requests
+                    a domain name. Before opening a packet capture, list the 
+                    sequence of events you expect to occur from DNS resolution 
+                    through the initial network connection. Then review a
+                    packet capture—either one you create yourself using Wireshark
+                    or a publicly available sample—and compare it to your 
+                    expectations. Identify where the DNS query occurs, when the 
+                    response is received, and how the client uses that
+                    information to establish the next network connection.
+                </p>
+
+            <h3>
+                Endpoint / EDR Telemetry
+            </h3>
+                <p>
+                    Endpoint Detection and Response (EDR) platforms and other
+                    endpoint monitoring tools provide visibility into the 
+                    processes and applications generating DNS activity. While 
+                    DNS logs identify the queried domains and packet captures 
+                    record the network communication, endpoint telemetry helps 
+                    analysts determine which executable, script, or user action 
+                    initiated the request. This additional context is invaluable 
+                    when distinguishing legitimate application behavior from malware
+                    or unauthorized software.
+                </p>                
+                <p>
+                    <strong>
+                        Key Information:
+                    </strong>
+                </p>
+                    <ul>
+                        <li>
+                            <strong>
+                                Process information – 
+                            </strong> 
+                                Identifies the executable or script responsible for 
+                                generating the DNS request.
+                        </li>
+                        <li>
+                            <strong> 
+                                Process hierarchy – 
+                            </strong>
+                                Shows parent and child process relationships that 
+                                help explain how the activity originated.
+                        </li>
+                        <li>
+                            <strong> 
+                                User context –
+                            </strong> 
+                                Associates DNS activity with the logged-on user or 
+                            service account.
+                        </li>
+                        <li>
+                            <strong> 
+                                Related endpoint activity –
+                            </strong>
+                               Correlates DNS requests with file modifications, 
+                            network connections, registry changes, scheduled 
+                            tasks, or other endpoint events.
+                        </li>
+                    </ul>
+
+                <p>
+                   <strong>
+                       Common Findings: 
+                   </strong>
+                </p>
+                <ul>
+                    <li> 
+                        Unknown or unexpected processes generating DNS requests.
+                    </li>
+                    <li> 
+                        DNS activity that closely aligns with suspicious process 
+                        execution or persistence mechanisms.
+                    </li>
+                    <li>
+                        Multiple suspicious behaviors originating from the same
+                        process, such as DNS queries followed by outbound
+                        network connections or file modifications.
+                    </li>
+                     <li>
+                        Legitimate administrative or security tools 
+                        generating DNS activity that initially appears
+                        suspicious but can be explained through endpoint context.
+                     </li>
+                </ul>
+
+                    <p>
+                        <strong> 
+                            Skill Builder: 
+                        </strong>
+                        Open several applications you use regularly, such as 
+                        a web browser, email client, messaging application, or 
+                        game launcher, and think about the DNS activity each 
+                        might generate. Consider which domains each 
+                        application would likely contact and why. If you have 
+                        access to endpoint telemetry through tools such as 
+                        Sysmon, Microsoft Defender, or another monitoring 
+                        solution, compare your expectations to the recorded 
+                        process and network activity. Focus on understanding how 
+                        endpoint telemetry helps attribute DNS requests to the 
+                        application or process that generated them.
+                    </p>
+
+
+                <h3>
+                    DNS Controls and Network Enforcement
+                </h3>
+                <p>
+                    DNS security is not limited to monitoring and investigation.
+                    Organizations also implement technical controls to manage 
+                    how DNS is used, reduce the attack surface, and improve 
+                    visibility into network activity. Understanding where 
+                    these controls exist helps analysts recognize when 
+                    attackers are attempting to bypass them and provides
+                    valuable context during investigations.
+                </p>
+            
+            </section>
 
 
 
