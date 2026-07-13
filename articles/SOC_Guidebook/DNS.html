@@ -823,16 +823,328 @@
                 <h3>
                     DNS Controls and Network Enforcement
                 </h3>
+                    <p>
+                        DNS security is not limited to monitoring and investigation.
+                        Organizations also implement technical controls to manage 
+                        how DNS is used, reduce the attack surface, and improve 
+                        visibility into network activity. Understanding where 
+                        these controls exist helps analysts recognize when 
+                        attackers are attempting to bypass them and provides
+                        valuable context during investigations.
+                    </p>
+                    <p>
+                        <strong>
+                            Key Information:
+                        </strong>
+                    </p>
+                        <ul>
+                            <li>
+                               <strong> 
+                                   Internal recursive resolvers – 
+                               </strong>
+                                Centralize DNS resolution, enforce organizational
+                                policies, and provide a consistent source of DNS 
+                                logs. 
+                            </li>
+                            <li>
+                                <strong>
+                                    Firewall and network policies – 
+                                </strong>
+                                Restrict outbound DNS traffic to approved 
+                                resolvers and help prevent unauthorized DNS 
+                                communication. 
+                            </li>
+                            <li>
+                                <strong>
+                                    DNS filtering – 
+                                </strong>
+                                Blocks or redirects requests to known malicious
+                                or prohibited domains based on organizational 
+                                policy. 
+                            </li>
+                            <li>
+                                <strong>
+                                    Encrypted DNS policies – 
+                                </strong>
+                                Determine whether technologies such as DNS 
+                                over HTTPS (DoH) or DNS over TLS (DoT) are 
+                                permitted, restricted, or monitored within 
+                                the environment.                                
+                            </li>
+                        </ul>
+                
+                    <p>
+                        <strong>
+                            Common Findings:
+                        </strong>    
+                    </p>
+                        <ul>
+                            <li>
+                                Endpoints sending DNS requests directly to
+                                external public resolvers instead of 
+                                approved internal resolvers.
+                            </li>
+                            <li>
+                                Attempts to bypass DNS filtering or network 
+                                policies using unauthorized encrypted DNS 
+                                services. 
+                            </li>
+                            <li>
+                                Systems repeatedly querying blocked or known
+                                malicious domains. 
+                            </li>
+                            <li>
+                                Policy violations that explain unexpected DNS 
+                                behavior without indicating a system compromise. 
+                            </li>
+                        </ul>
+                    <p>
+                        <strong>
+                            Skill Builder: 
+                        </strong>
+                        Choose a website or online service you use regularly and
+                        think about what would happen if your organization 
+                        blocked access to it through DNS. Consider how the 
+                        request would differ from a successful lookup, what 
+                        evidence might appear in DNS logs, and how the user 
+                        would experience the block. Then research one DNS security 
+                        solution, such as Quad9, Cisco Umbrella, or Cloudflare 
+                        Gateway, and compare the types of protections it provides 
+                        against the attack techniques discussed in this guide.
+                    </p>
+                
+            <h2>
+                SOC Analyst Perspective
+            </h2>
                 <p>
-                    DNS security is not limited to monitoring and investigation.
-                    Organizations also implement technical controls to manage 
-                    how DNS is used, reduce the attack surface, and improve 
-                    visibility into network activity. Understanding where 
-                    these controls exist helps analysts recognize when 
-                    attackers are attempting to bypass them and provides
-                    valuable context during investigations.
+                    Recognizing suspicious DNS patterns is only the first step in 
+                    an investigation. Analysts must determine whether the observed 
+                    activity represents normal network behavior, a misconfiguration,
+                    or malicious activity before deciding how to proceed. The 
+                    workflows below demonstrate a structured approach to validating 
+                    common DNS-related alerts by correlating evidence from DNS logs, 
+                    packet captures, endpoint telemetry, and other available data 
+                    sources. Although the examples discuss potential mitigation 
+                    strategies, the actions an analyst is authorized to perform vary 
+                    between organizations. Some SOCs expect Tier 1 analysts to 
+                    implement limited containment measures, while others require 
+                    analysts to document their findings and escalate the incident 
+                    before any action is taken. Understanding your organization's 
+                    procedures and assigned responsibilities is an essential part of 
+                    effective incident response.
                 </p>
-            
+                 <h3>
+                         Investigating High NXDOMAIN Rates   
+                </h3>
+                    <p>
+                        High volumes of <strong>NXDOMAIN</strong> responses do not
+                        automatically indicate malicious activity. They may result 
+                        from malware using a Domain Generation Algorithm (DGA), 
+                        misconfigured applications, typographical errors, or recent 
+                        infrastructure changes. The analyst's goal is to determine 
+                        the underlying cause of the observed pattern and whether it 
+                        represents an operational issue, a misconfiguration, user 
+                        behavior, or malicious activity.
+                    </p>
+                    <p>
+                        <strong>First — Identify hosts with elevated NXDOMAIN activity 
+                            using DNS or SIEM logs.
+                        </strong>
+                            Look for hosts generating unusually high numbers of 
+                        NXDOMAIN responses compared to similar systems during the same 
+                        time period. Group the results by client IP address and 
+                        response code to identify the systems generating the highest 
+                        volume of failed lookups.
+                    </p>
+                    <p>
+                        <strong> 
+                            Then — Analyze the queried domains for suspicious or
+                            unusual patterns.
+                        </strong>
+                            Determine whether the failed lookups appear algorithmic 
+                        (random-looking domain names), resemble typographical errors
+                        , or target legitimate internal resources that no longer 
+                        exist. Multiple failed lookups for random-looking domains 
+                        under the same top-level domain (TLD) may indicate DGA 
+                        activity, whereas repeated queries for misspelled internal 
+                        domains often point to configuration or application issues.
+                    </p>
+                    <p>
+                        <strong>
+                            Finally — Determine the appropriate mitigation.
+                        </strong>
+                        The appropriate response depends on the underlying cause of 
+                        the failed lookups. Malware or DGA activity may require host 
+                        isolation and incident response, while misconfigured 
+                        applications, outdated DNS records, or typographical errors 
+                        are often resolved through configuration changes or user 
+                        education. Continue monitoring to verify that NXDOMAIN rates 
+                        return to expected levels after corrective actions are taken.
+                    </p>
+                
+                <h3>
+                    Investigating Suspected DNS Tunneling
+                </h3>
+                    <p>
+                        DNS tunneling attempts to disguise data transfers 
+                        within legitimate DNS traffic, making it a common 
+                        technique for command-and-control (C2) 
+                        communication and data exfiltration. However, 
+                        unusual DNS queries do not automatically indicate 
+                        tunneling, as some legitimate applications generate 
+                        long subdomains, frequent TXT record lookups, or 
+                        high volumes of DNS requests. The analyst's goal is 
+                        to determine whether the observed activity is 
+                        consistent with normal application behavior or 
+                        represents an attempt to bypass network controls.
+                    </p>
+                    <p>
+                        <strong>
+                            First — Identify hosts with unusual DNS query 
+                            characteristics.
+                        </strong>
+                            Review DNS or SIEM logs for hosts generating 
+                        unusually long subdomains, high volumes of TXT 
+                        (or other uncommon) record lookups, or DNS traffic 
+                        that is disproportionate to the host's normal 
+                        activity. Compare the observed behavior against 
+                        the organization's typical DNS usage to identify 
+                        systems that warrant further investigation.
+                    </p>
+                    <p>
+                        <strong>
+                            Then — Examine domains and query patterns.
+                        </strong>
+                            Look for repeated queries to a small number 
+                        of domains where only the subdomain changes and 
+                        appears high entropy (random-looking characters).
+                        Correlate the DNS activity with packet captures 
+                        and endpoint telemetry to determine whether the 
+                        requests originated from legitimate applications 
+                        or suspicious processes. Consider whether the 
+                        domains are associated with known services, 
+                        recently registered infrastructure, or previously 
+                        identified malicious activity.
+                    </p>
+                    <p>
+                        <strong>
+                            Finally — Determine the appropriate mitigation.
+                        </strong>
+                            If the available evidence supports suspected DNS 
+                        tunneling, consider how the activity can be 
+                        interrupted while minimizing disruption to legitimate
+                        users. Potential actions may include blocking the 
+                        malicious domains, restricting suspicious DNS record 
+                        types where appropriate, isolating affected hosts, or 
+                        working with network and incident response teams to 
+                        contain the compromised systems. Continue monitoring to 
+                        verify that the suspicious DNS activity has stopped.
+                    </p>
+
+                <h3>
+                    Investigating Suspected DNS Hijacking
+                </h3>
+                    <p>
+                        DNS hijacking redirects users to unintended 
+                        destinations by altering DNS responses or 
+                        manipulating the systems responsible for name
+                        resolution. While this behavior may indicate 
+                        malicious activity, unexpected DNS results can
+                        also stem from legitimate infrastructure 
+                        changes, DNS propagation, load balancing, or 
+                        configuration errors. The analyst's goal is to 
+                        determine whether the observed DNS responses are
+                        expected or whether they indicate unauthorized 
+                        manipulation.
+                    </p>
+                    <p>
+                        <strong>
+                            First — Validate the reported activity.
+                        </strong>
+                            Begin with the alert or user report and identify 
+                        the domain, hostname, or destination involved in the 
+                        reported activity. Review the corresponding DNS 
+                        queries and responses, noting the returned A, AAAA, 
+                        or other relevant records, resolved IP addresses, 
+                        response times, and any recent changes that could 
+                        explain the observed behavior.
+                    </p>
+                    <p>
+                        <strong> 
+                            Then — Verify the DNS responses against trusted sources.
+                        </strong>
+                            Compare the returned DNS records with trusted sources to
+                        determine whether the client was directed to the expected 
+                        destination. If the responses differ, determine whether the
+                        discrepancy can be explained by legitimate operational 
+                        changes or whether it raises concern for unauthorized DNS 
+                        manipulation. Correlate your findings with other available 
+                        evidence to understand the scope and impact of the observed
+                        activity.
+                    </p>
+                    <p>
+                    <strong>
+                        Finally — Determine the appropriate mitigation.
+                    </strong>
+                        If the evidence suggests unauthorized DNS manipulation,
+                        consider what must be corrected to restore normal DNS 
+                        resolution. Depending on the cause, this may include 
+                        flushing poisoned DNS caches, restoring correct DNS 
+                        records, removing unauthorized resolver settings, 
+                        correcting compromised hosts file entries, blocking 
+                        access to malicious infrastructure, or coordinating with
+                        DNS administrators to remediate the affected systems. 
+                        Continue monitoring to verify that users are receiving 
+                        the expected DNS responses.
+                    </p>
+
+
+                <p>
+                    While the specific steps vary depending on the alert 
+                    and the environment, successful DNS investigations 
+                    consistently rely on correlating evidence from 
+                    multiple sources rather than drawing conclusions from 
+                    a single indicator. Whether investigating malware, 
+                    tunneling, hijacking, or another form of DNS abuse, 
+                    developing this evidence-based approach enables 
+                    analysts to distinguish routine network activity 
+                    from genuine threats and make informed escalation 
+                    decisions.
+                </p>
+            <h2>
+                Conclusion
+            </h2>
+                <p>
+                    DNS plays a critical role in modern networks and often
+                    provides some of the earliest insight into what systems
+                    are attempting to communicate with. For SOC analysts, 
+                    understanding how DNS functions, recognizing common 
+                    abuse techniques, and interpreting DNS telemetry provide
+                    valuable context for identifying suspicious activity and
+                    supporting broader investigations.
+                </p>
+                <p>
+                    While DNS provides valuable visibility, effective 
+                    investigations depend on understanding the broader 
+                    context surrounding the activity. Analysts develop 
+                    confidence in their conclusions by validating 
+                    observations, considering legitimate explanations, 
+                    and correlating DNS evidence with other available 
+                    telemetry before determining the appropriate 
+                    response.
+                </p>
+
+                <br>
+                
+                <p>
+                    As you continue studying networking and cybersecurity,
+                    focus on understanding not only how protocols function,
+                    but also how analysts use them during real investigations.
+                    Developing the habit of asking questions, validating 
+                    assumptions, and correlating evidence will be just as 
+                    valuable as learning the technical details themselves.
+                </p>
+                
             </section>
 
 
