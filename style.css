@@ -31,14 +31,6 @@ header {
     padding: 1rem 2rem;
 }
 
-
-.article-header {
-    border: 2px solid red;
-}
-
-.guide-box {
-    border: 2px solid blue;
-}
 /* ========================================
    2. Typography
 ======================================== */
@@ -95,7 +87,12 @@ p {
     margin-bottom: 1rem;
 }
 
-
+/* Lists */
+ul,
+ol {
+    padding-left: 2rem;
+    margin-bottom: 1rem;
+}
 
 /* ========================================
    3. Links
