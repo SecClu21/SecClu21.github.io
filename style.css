@@ -26,6 +26,10 @@ main {
     padding: 2rem;
 }
 
+/* Site header */
+header {
+    padding: 1rem 2rem;
+}
 
 /* ========================================
    2. Typography
