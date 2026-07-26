@@ -31,6 +31,14 @@ header {
     padding: 1rem 2rem;
 }
 
+
+.article-header {
+    border: 2px solid red;
+}
+
+.guide-box {
+    border: 2px solid blue;
+}
 /* ========================================
    2. Typography
 ======================================== */
