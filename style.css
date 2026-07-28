@@ -51,7 +51,6 @@ header {
 h1,
 h2,
 h3 {
-    color: #1a1a1a;
     line-height: 1.3;
     margin-bottom: 1rem;
 }
@@ -59,6 +58,7 @@ h3 {
 /* Main article title */
 h1 {
     font-size: 2.2rem;
+    color: var(--color-dark)
 }
 
 /* Article subtitle */
@@ -86,12 +86,14 @@ h1 {
 h2 {
     font-size: 1.6rem;
     margin-top: 2.5rem;
+    color: var(--accent-color);
 }
 
 /* Subsection headings */
 h3 {
     font-size: 1.25rem;
     margin-top: 2rem;
+    color: var(--accent-color-dark);
 }
 
 /* Paragraphs */
