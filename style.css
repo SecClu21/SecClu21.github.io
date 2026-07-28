@@ -86,14 +86,14 @@ h1 {
 h2 {
     font-size: 1.6rem;
     margin-top: 2.5rem;
-    color: var(--accent-color);
+    color: var(--color-accent);
 }
 
 /* Subsection headings */
 h3 {
     font-size: 1.25rem;
     margin-top: 2rem;
-    color: var(--accent-color-dark);
+    color: var(--color-accent-dark);
 }
 
 /* Paragraphs */
