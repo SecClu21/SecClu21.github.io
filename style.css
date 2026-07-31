@@ -108,6 +108,15 @@ ol {
     margin-bottom: 1rem;
 }
 
+
+/* Analysis section - Skill Builder spacing */
+.skill-builder {
+    margin-bottom: 2.5rem;
+}
+/* ========================================
+   3. Guide Information Box
+======================================== */
+
 /* Guide Information box */
 .guide-box {
     background-color: var(--color-accent-pale);
@@ -116,13 +125,12 @@ ol {
     margin-bottom: 2rem;
 }
 
-/* Analysis section - Skill Builder spacing */
-.skill-builder {
-    margin-bottom: 2.5rem;
+/* Guide Information title */
+.guide-box h2 {
+    margin-top: 0;
 }
-
 /* ========================================
-   3. Links
+   4. Links
 ======================================== */
 
 /* Default hyperlink appearance */
