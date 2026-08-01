@@ -97,10 +97,11 @@ h3 {
 }
 
 /* Individual attack headings */
-h4 {
-    font-size: 1.1rem;
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
+
+   h4 {
+    font-size: 1.15rem;
+    margin-top: 1.75rem;
+    margin-bottom: 0.5rem;
     color: var(--color-dark);
 }
 
