@@ -99,25 +99,26 @@
                 </a>
 
             <h1>
-                TCP vs UDP: What Analysts Detect in Network Traffic
+               TCP and UDP for SOC Analysts: Detection, Investigation,
+               and Traffic Analysis
             </h1>
 
                 <p class="article-subtitle">
-                    Exploring the differences between TCP and UDP,
-                    how these protocols appear in network traffic,
-                    and why they matter from a security monitoring perspective.
+                    A practical guide to understanding TCP and UDP, 
+                    recognizing suspicious network traffic, and using 
+                    protocol behavior to investigate security events.
                  </p>
 
             <div class="article-meta">
 
                 <p>
-                    Published: July 2026
+                    Published: August 2026
                 </p>
 
-            <!--     <p>
+                <p>
                     Last Updated: July 2026
-                    </p>
-              -->  
+                </p>
+            
 
     </div>
 
@@ -232,8 +233,1265 @@
 
 
                 <!-- Article text will go here -->
+                <h2>
+                    Introduction
+                </h2>
+                    <p>
+                        Transmission Control Protocol (TCP) and User Datagram
+                        Protocol (UDP) form the foundation of most modern 
+                        network communication. Whether a user is browsing a 
+                        website, streaming video, sending email, or resolving 
+                        a domain name, one of these transport protocols is 
+                        usually responsible for moving data between systems. 
+                        Because they support so much legitimate network 
+                        activity, they also appear throughout firewall logs, 
+                        packet captures, Security Information and Event 
+                        Management (SIEM) alerts, and other network telemetry 
+                        that analysts review every day.
+                    </p>
+                    <p>
+                        Attackers also take advantage of TCP and UDP during 
+                        different stages of an intrusion, using normal network
+                        communication to conduct reconnaissance, deliver 
+                        malware, establish command-and-control (C2) 
+                        communications, or launch denial-of-service attacks.
+                        Understanding how these protocols normally behave helps 
+                        analysts recognize when network traffic deviates from 
+                        expected patterns and determine whether the activity 
+                        reflects normal operations, a misconfiguration, or 
+                        malicious behavior.
+                    </p>
+                    <p>
+                        This guide introduces the fundamental differences
+                        between TCP and UDP, explains why those differences 
+                        matter during investigations, and explores common attack
+                        patterns, sources of protocol evidence, and the 
+                        investigative thinking SOC analysts use to evaluate 
+                        suspicious network activity.
+                    </p>
+                <h2>
+                    What TCP and UDP Are
+                </h2>
+                    <p>
+                        TCP and UDP are the two primary transport layer protocols 
+                        used to move data between systems across IP networks.
+                        Although they perform the same general function—transporting
+                        application data—they take very different approaches to 
+                        communication. TCP prioritizes reliable, ordered delivery, 
+                        while UDP prioritizes speed and efficiency by minimizing 
+                        communication overhead.
+                    </p>
+                    <p>
+                        These differences influence how applications use each 
+                        protocol and the types of network behavior analysts observe
+                        during investigations. Because TCP and UDP support most 
+                        modern network communication, they appear throughout packet 
+                        captures, firewall logs, intrusion detection system (IDS) 
+                        alerts, SIEM platforms, and other sources of network
+                        telemetry. Understanding which protocol is being used—and 
+                        why—provides important context when interpreting alerts, 
+                        validating suspicious activity, and distinguishing expected
+                        behavior from potential security incidents.
+                    </p>
+                    <p>
+                        To understand why TCP and UDP produce different traffic 
+                        patterns and investigative evidence, it is important to first 
+                        understand how each protocol communicates across the network. 
+                        Although both protocols transport application data, they use 
+                        fundamentally different communication methods to accomplish that 
+                        task. Those differences shape the network behavior analysts observe
+                        and provide the foundation for understanding the attack patterns 
+                        and investigative techniques discussed later in this guide.
+                    </p>
+                <h2>
+                    How TCP and UDP Work
+                </h2>
+                    <p>
+                       Although TCP and UDP both transport application data across 
+                        IP networks, they do so in fundamentally different ways. 
+                        These design choices affect not only application performance
+                        but also the network artifacts analysts observe during 
+                        investigations. Understanding these communication methods
+                        helps explain why the two protocols produce different 
+                        evidence during security investigations.
+                    </p>
+                    <p>
+                        Before TCP transfers any data, it establishes a 
+                        connection through a three-way handshake. The client 
+                        begins by sending a synchronization (SYN) packet, the 
+                        server acknowledges with a synchronization-acknowledgment 
+                        (SYN-ACK), and the client completes the process with an 
+                        acknowledgment (ACK). Once the connection is established, 
+                        TCP uses sequence numbers and acknowledgments to confirm
+                        that data arrives completely and in the correct order,
+                        retransmitting missing or out-of-sequence data to maintain
+                        reliable communication.
+                    </p>
+                    <p>
+                        UDP takes a much simpler approach. Rather than establishing
+                        a connection, it immediately sends independent packets, 
+                        called datagrams, to the destination without verifying that
+                        they arrive or are received in order. This lightweight 
+                        design reduces communication overhead and makes UDP well
+                        suited for applications such as DNS, Voice over IP (VoIP),
+                        video streaming, and online gaming, where low latency is
+                        often more important than perfect reliability.
+                    </p>
+                    <p>
+                        These differences produce distinct traffic patterns that 
+                        analysts use during investigations. TCP's predictable 
+                        connection lifecycle generates evidence such as connection 
+                        establishment, acknowledgments, retransmissions, and 
+                        session termination that can be observed in packet captures
+                        and connection logs. Because UDP does not maintain connection
+                        state, analysts instead focus on communication patterns, 
+                        packet volume, timing, destination services, and other 
+                        surrounding context when determining whether activity is 
+                        consistent with normal network behavior.
+                    </p>
+                <h2>
+                    Common TCP and UDP Attack Patterns and Indicators
+                </h2>
+                    <p>
+                        Most TCP and UDP traffic in an environment 
+                        supports legitimate network communication, 
+                        making context an important part of every 
+                        investigation. Rather than relying on a single
+                        packet or connection, analysts look for patterns,
+                        which describe repeated or unusual behaviors that
+                        may indicate suspicious activity. They then 
+                        evaluate indicators, which are the observable 
+                        pieces of evidence used to determine whether those
+                        patterns reflect legitimate activity or a potential
+                        security incident. While indicators can suggest 
+                        suspicious activity, they do not confirm that an 
+                        attack is occurring. Analysts correlate multiple 
+                        sources of evidence, consider legitimate explanations,
+                        and evaluate the surrounding context before determining 
+                        whether activity warrants further investigation. The 
+                        examples below highlight common ways attackers abuse 
+                        TCP and UDP, along with the patterns and indicators 
+                        analysts use to evaluate suspicious network activity.
+                    </p>
+                
+                    <h3>
+                        TCP Attack Patterns:
+                    </h3>
+                
+                        <h4>
+                            SYN Flood
+                        </h4>
+                            <p>
+                                A SYN flood is a denial-of-service (DoS) 
+                                attack that attempts to exhaust server 
+                                resources by sending large numbers of 
+                                TCP synchronization (SYN) packets without
+                                completing the TCP three-way handshake. 
+                                Each incomplete connection consumes server
+                                resources while waiting for the final 
+                                acknowledgment (ACK), eventually limiting 
+                                the server's ability to establish new 
+                                connections with legitimate clients.
+                            </p>                            
+                            <p>
+                                <strong>Patterns:</strong> 
+                                Rather than completing the TCP connection
+                                process, an attacker continuously 
+                                initiates new connection requests that 
+                                remain unfinished. Analysts may observe 
+                                a sustained increase in SYN packets with 
+                                comparatively few completed handshakes, 
+                                resulting in an increasing number of 
+                                half-open connections on the target system.
+                                During distributed attacks, these connection
+                                attempts often originate from multiple source
+                                IP addresses, making the activity appear to 
+                                come from many systems simultaneously.
+                            </p>
+                            <p>
+                                <strong> Indicators: </strong>
+                                Analysts may observe unusually high numbers of 
+                                SYN packets, incomplete TCP handshakes, or 
+                                connections remaining in the SYN_RECV state 
+                                within firewall logs, intrusion detection 
+                                system (IDS) alerts, Security Information and
+                                Event Management (SIEM) platforms, or packet 
+                                captures. While these indicators are consistent 
+                                with SYN flood activity, they do not confirm that 
+                                an attack is occurring. Temporary traffic spikes, 
+                                load testing, or application and network issues can
+                                produce similar observations. Analysts should 
+                                correlate multiple sources of evidence, consider 
+                                legitimate explanations, and evaluate the surrounding
+                                context before determining whether the observed 
+                                activity is malicious.
+                            </p>
+                
+                        <h4>
+                            TCP Port Scanning
+                        </h4>
+                            <p>
+                                Port scanning is a reconnaissance technique used
+                                to identify open ports and services on a target 
+                                system before attempting further activity. By 
+                                determining which services are accessible, 
+                                attackers can identify potential entry points, 
+                                while defenders use the same technique for 
+                                legitimate purposes such as security assessments, 
+                                vulnerability management, and network inventory. 
+                                For analysts, the objective is to determine whether 
+                                the observed scanning activity represents expected 
+                                administrative behavior or unauthorized reconnaissance.
+                            </p>
+                            <p>
+                                <strong>
+                                    Patterns:
+                                </strong>
+                                TCP port scans often generate numerous connection 
+                                attempts across multiple ports on a single host or 
+                                the same port across multiple hosts within a short 
+                                period. The observed pattern often depends on the 
+                                available telemetry. Analysts reviewing an endpoint 
+                                may observe a single source probing numerous TCP 
+                                ports on one system, while network devices often 
+                                reveal the same TCP ports being probed across 
+                                multiple systems from a single source. Depending on 
+                                the scanning technique, analysts may observe completed
+                                TCP connections or repeated SYN packets that are 
+                                intentionally left incomplete. The activity often 
+                                follows a sequential or otherwise systematic pattern 
+                                that differs from normal application traffic.
+                            </p>
+                            <p>
+                                <strong>
+                                    Indicators:
+                                </strong>
+                                Analysts may observe repeated connection 
+                                attempts from the same source, sequential 
+                                destination ports, or activity targeting 
+                                multiple systems in rapid succession within 
+                                firewall logs, IDS alerts, SIEM platforms, 
+                                packet captures, or endpoint telemetry. 
+                                While these indicators can suggest 
+                                reconnaissance, they do not confirm 
+                                malicious intent. Vulnerability scanners,
+                                asset discovery tools, network administrators
+                                , and authorized penetration tests often 
+                                generate similar traffic. Analysts should 
+                                correlate multiple sources of evidence, 
+                                consider legitimate explanations, and evaluate
+                                the surrounding context before determining 
+                                whether the observed activity represents 
+                                expected administrative behavior or 
+                                unauthorized reconnaissance.
+                            </p>
+
+                        <h4>
+                                TCP Reset Attacks
+                        </h4>
+                            <p>
+                                A TCP Reset (RST) attack attempts to 
+                                disrupt an established TCP connection by 
+                                sending forged reset (RST) packets to one
+                                or both communicating systems. Because a 
+                                valid RST packet instructs a device to 
+                                immediately terminate a connection, 
+                                attackers may use this technique to 
+                                interrupt legitimate communications, 
+                                disrupt services, or interfere with
+                                ongoing network sessions. For analysts, 
+                                the objective is to determine whether 
+                                unexpected connection resets reflect normal 
+                                network behavior, legitimate administrative 
+                                activity, or an attempt to disrupt or 
+                                manipulate communications.
+                            </p>
+                            <p>
+                                <strong>
+                                    Patterns: 
+                                </strong>
+                                    TCP Reset attacks often involve unexpected
+                                connection terminations during otherwise normal
+                                communication. Analysts may observe reset 
+                                packets appearing at unusual points within a 
+                                session, repeated connection interruptions, or 
+                                applications repeatedly attempting to 
+                                re-establish connections after they are 
+                                unexpectedly closed. When successful, these 
+                                attacks can produce intermittent connectivity 
+                                issues that initially resemble ordinary network 
+                                instability.
+                            </p>
+                            <p>
+                                <strong>
+                                    Indicators: 
+                                </strong>
+                                Analysts may observe unexpected RST packets that
+                                do not align with the normal flow of a TCP 
+                                session within packet captures, repeated 
+                                connection resets in firewall logs, intrusion 
+                                detection system (IDS) alerts, endpoint 
+                                telemetry, or Security Information and Event 
+                                Management (SIEM) platforms, or applications that
+                                continuously attempt to reconnect after sessions 
+                                are unexpectedly terminated. While these 
+                                indicators may suggest an attempt to disrupt 
+                                TCP communications, they do not confirm that a 
+                                TCP Reset attack is occurring. Network devices, 
+                                firewalls, application timeouts, configuration 
+                                changes, or legitimate protocol behavior can also 
+                                generate reset packets. Analysts should correlate 
+                                multiple sources of evidence, consider legitimate 
+                                explanations, and evaluate the surrounding context 
+                                before determining whether the observed resets 
+                                represent malicious activity or expected network 
+                                behavior.
+                            </p>
+
+                        <h4>
+                            Session Hijacking
+                        </h4>
+                            <p>
+                                Session hijacking occurs when an attacker attempts 
+                                to take control of an established TCP session by 
+                                intercepting or manipulating an active connection 
+                                between two systems. Rather than creating a new 
+                                connection, the attacker seeks to impersonate one
+                                of the communicating parties to gain unauthorized 
+                                access or perform actions within an existing session.
+                                Although modern encryption and secure application 
+                                protocols have made traditional session hijacking 
+                                more difficult, understanding how attackers attempt 
+                                to interfere with established TCP sessions helps 
+                                analysts recognize abnormal connection behavior and
+                                appreciate the security mechanisms that protect 
+                                modern communications. For analysts, the objective
+                                is to determine whether unexpected session behavior
+                                reflects normal network conditions, legitimate 
+                                administrative activity, or an attempt to interfere
+                                with an established connection.
+                            </p>
+                            <p>
+                                <strong>                   
+                                    Patterns: 
+                                </strong>
+                                
+                                    Session hijacking often involves attempts 
+                                    to inject forged packets into an 
+                                    established TCP session or manipulate 
+                                    sequence numbers to disrupt or assume 
+                                    control of the connection. Depending on 
+                                    the attack method, analysts may observe 
+                                    unexpected TCP reset (RST) packets, 
+                                    duplicate acknowledgments, abnormal 
+                                    sequence number behavior, or sudden 
+                                    interruptions to otherwise stable network
+                                    sessions. These anomalies may also coincide
+                                    with unusual authentication events or
+                                    unexpected changes in user activity.
+                                </p>
+                                <p>
+                                    <strong>
+                                        Indicators:
+                                    </strong>
+                                    Analysts may observe unexpected TCP
+                                    reset (RST) packets, irregular 
+                                    sequence or acknowledgment numbers, 
+                                    or traffic that is inconsistent with
+                                    the normal flow of an established 
+                                    session within packet captures. 
+                                    Firewall logs, intrusion detection 
+                                    system (IDS) alerts, endpoint 
+                                    telemetry, authentication logs, and 
+                                    Security Information and Event 
+                                    Management (SIEM) platforms may also 
+                                    provide evidence of disrupted 
+                                    connections or suspicious account 
+                                    activity. While these indicators can
+                                    suggest an attempt to interfere with an 
+                                    active session, they do not confirm that 
+                                    session hijacking is occurring. Network 
+                                    instability, application errors, routing 
+                                    changes, or legitimate connection resets 
+                                    can produce similar observations. Analysts 
+                                    should correlate multiple sources of 
+                                    evidence, consider legitimate explanations
+                                    , and evaluate the surrounding context 
+                                    before determining whether the observed 
+                                    activity represents malicious interference
+                                    or expected operational behavior.
+                                </p>
+                    <h3>
+                        UDP Attack Patterns
+                    </h3>
+                        <h4>
+                            UDP Floods
+                        </h4>
+                            <p> 
+                                A UDP flood is a DoS attack that
+                                attempts to overwhelm a target by 
+                                sending large volumes of UDP traffic.
+                                Unlike TCP, UDP does not establish 
+                                connections or verify that packets are
+                                received, allowing attackers to generate
+                                high volumes of traffic with minimal
+                                communication overhead. As network
+                                bandwidth or system resources become 
+                                saturated, legitimate users may
+                                experience degraded performance or lose
+                                access to affected services. For analysts, 
+                                the objective is to determine whether 
+                                elevated UDP traffic reflects expected
+                                network activity or an attempt to disrupt 
+                                the availability of network services.
+                            </p>
+                            <p>
+                            <strong>
+                                Patterns:
+                            </strong>
+                                UDP floods typically generate sustained,
+                                high-volume UDP traffic directed at one 
+                                or more systems or services. Analysts may
+                                observe a significant increase in packets
+                                targeting specific UDP ports or multiple 
+                                ports simultaneously, often with little or
+                                no corresponding application activity. 
+                                During distributed attacks, the traffic may
+                                originate from multiple source IP addresses,
+                                making it appear to come from many systems 
+                                simultaneously.
+                            </p>
+                            <p>
+                                <strong>
+                                    Indicators:
+                                </strong>
+                                Analysts may observe unusually 
+                                large volumes of UDP traffic, 
+                                increased bandwidth utilization, 
+                                or a sudden rise in traffic directed 
+                                at specific UDP services within
+                                firewall logs, IDS alerts, SIEM
+                                platforms, network flow data, or
+                                packet captures. While these
+                                indicators may be consistent with a 
+                                UDP flood, they do not confirm that 
+                                one is occurring. Legitimate events 
+                                such as software updates, media 
+                                streaming, backups, large file 
+                                transfers, or temporary spikes in 
+                                network activity can produce similar 
+                                observations. Analysts should correlate 
+                                multiple sources of evidence, consider 
+                                legitimate explanations, and evaluate the 
+                                surrounding context before determining 
+                                whether the observed activity is consistent 
+                                with a UDP flood.
+                            </p>
+                        <h4>
+                            UDP Amplification Attacks
+                        </h4>
+                            <p>
+                                A UDP amplification attack is a DoS 
+                                attack that abuses legitimate UDP 
+                                services to generate significantly 
+                                larger responses than the original 
+                                requests. Attackers typically spoof
+                                the victim's IP address and send small
+                                requests to publicly accessible 
+                                services, causing those services to 
+                                send much larger responses to the victim
+                                instead. This amplification allows 
+                                attackers to generate large volumes of
+                                traffic while minimizing their own 
+                                bandwidth usage. For analysts, the 
+                                objective is to determine whether 
+                                unusually large volumes of UDP traffic 
+                                result from legitimate service activity
+                                or an amplification attack targeting the
+                                organization.
+                            </p>
+                            <p>
+                                <strong>
+                                    Patterns: 
+                                </strong>
+                                    UDP amplification attacks often 
+                                involve large numbers of small requests
+                                sent to amplification services such as 
+                                DNS, NTP, SSDP, or CLDAP that generate 
+                                much larger responses. Analysts may 
+                                observe unusually high volumes of UDP
+                                traffic directed at a target, 
+                                disproportionate request-to-response 
+                                sizes, or traffic involving services 
+                                commonly abused for amplification. 
+                                During distributed attacks, the traffic
+                                often originates from many different
+                                systems simultaneously, making the attack
+                                appear to come from numerous legitimate servers.
+                            </p>
+                            <p>
+                                <strong>
+                                    Indicators: 
+                                </strong>
+                                Analysts may observe unusually large volumes 
+                                of inbound UDP traffic, response traffic that
+                                greatly exceeds the corresponding request size, 
+                                or spikes involving commonly abused UDP services 
+                                within firewall logs, IDS alerts, SIEM platforms,
+                                network flow data, or packet captures. While 
+                                these indicators may be consistent with a UDP
+                                amplification attack, they do not confirm that
+                                one is occurring. Legitimate high-volume services,
+                                content delivery, or temporary increases in
+                                network activity can produce similar observations
+                                . Analysts should correlate multiple sources of
+                                evidence, consider legitimate explanations, and
+                                evaluate the surrounding context before determining
+                                whether the observed activity is consistent with a
+                                UDP amplification attack.
+                            </p>
+                        <h4>
+                            UDP Port Scanning
+                        </h4>
+                            <p>
+                                A UDP port scan is a reconnaissance 
+                                technique used to identify UDP 
+                                services running on a target system
+                                before attempting further activity. 
+                                Because UDP is connectionless, 
+                                determining whether a port is open or
+                                closed is often less straightforward 
+                                than with TCP, requiring analysts to 
+                                interpret the absence of responses as 
+                                well as returned ICMP messages. For 
+                                analysts, the objective is to determine
+                                whether the observed scanning activity 
+                                represents expected administrative 
+                                behavior or unauthorized 
+                                reconnaissance.
+                            </p>
+                            <p>
+                                <strong>
+                                    Patterns: 
+                                </strong>
+                                UDP port scans typically generate 
+                                connection attempts across multiple
+                                UDP ports on one or more target 
+                                systems within a short period. 
+                                Depending on where the activity is
+                                observed, analysts may notice a
+                                single source probing numerous UDP
+                                ports on an individual endpoint or
+                                the same UDP ports being probed 
+                                across multiple systems from a 
+                                single source. The activity often 
+                                follows a sequential or otherwise 
+                                systematic pattern that differs
+                                from normal application traffic.
+                            </p>
+                            <p>
+                                <strong>
+                                    Indicators:
+                                </strong>
+                                Analysts may observe repeated UDP
+                                packets targeting multiple ports, 
+                                numerous ICMP "Port Unreachable" 
+                                messages, or activity involving 
+                                UDP services with little expected 
+                                application traffic within firewall
+                                logs, IDS alerts, SIEM platforms,
+                                network flow data, endpoint
+                                telemetry, or packet captures. 
+                                While these indicators may suggest
+                                reconnaissance, they do not confirm
+                                malicious intent. Vulnerability 
+                                scanners, asset discovery tools, 
+                                network administrators, and authorized
+                                penetration tests often generate similar 
+                                traffic. Analysts should correlate
+                                multiple sources of evidence, consider
+                                legitimate explanations, and evaluate
+                                the surrounding context before 
+                                determining whether the observed 
+                                activity is consistent with UDP port 
+                                scanning.
+                            </p>
+
+                
+                         <h4>
+                             UDP Spoofing and Reflection
+                         </h4>
+                             <p>
+                                 UDP spoofing and reflection attacks 
+                                 use forged source IP addresses to 
+                                 direct large volumes of traffic
+                                 toward an unintended victim. By 
+                                 spoofing the victim's IP address, 
+                                 an attacker can send requests to 
+                                 legitimate UDP services, which then 
+                                 return their responses to the victim 
+                                 instead of the attacker. Reflection is
+                                 frequently combined with amplification
+                                 techniques, allowing relatively small 
+                                 requests to generate much larger
+                                 responses. For analysts, the objective 
+                                 is to determine whether the observed 
+                                 traffic reflects legitimate communication 
+                                 or an attempt to conceal the true source of 
+                                 an attack while overwhelming the target.
+                             </p>
+                            <p>
+                                <strong>
+                                    Patterns: 
+                                </strong>
+                                UDP spoofing and reflection attacks 
+                                often involve requests sent to 
+                                services commonly abused for 
+                                reflection, such as DNS, NTP, or 
+                                SSDP, using forged source IP 
+                                addresses. Depending on where the 
+                                activity is observed, analysts 
+                                investigating the target may see large
+                                numbers of responses arriving from 
+                                legitimate UDP services without
+                                corresponding outbound requests from 
+                                the victim. During distributed attacks,
+                                these responses often originate from many 
+                                different systems simultaneously, making
+                                the traffic appear to come from numerous 
+                                legitimate servers rather than a single
+                                attacker.
+                            </p>
+                            <p>
+                                <strong>
+                                    Indicators:
+                                </strong>
+                                    Analysts may observe sudden
+                                increases in UDP traffic involving
+                                commonly abused reflection services,
+                                unexpected relationships between
+                                requests and responses, or traffic 
+                                arriving from numerous legitimate 
+                                servers within firewall logs, IDS 
+                                alerts, SIEM platforms, network flow 
+                                data, or packet captures. While these 
+                                indicators may be consistent with UDP 
+                                spoofing or reflection, they do not
+                                confirm that an attack is occurring. 
+                                Legitimate network changes, 
+                                misconfigurations, or high-volume UDP
+                                services can produce similar observations.
+                                Analysts should correlate multiple sources 
+                                of evidence, consider legitimate explanations,
+                                and evaluate the surrounding context before 
+                                determining whether the observed activity is 
+                                consistent with UDP spoofing or reflection.
+                            </p>
 
 
+
+                <h2>
+                    Analysis & Practical Exercises
+                </h2>
+                    <p>
+                        Understanding how TCP and UDP function is only 
+                        the first step. During investigations, 
+                        analysts rarely rely on a single packet, 
+                        log entry, or alert to determine whether 
+                        activity is malicious. Instead, they 
+                        correlate evidence from multiple sources to
+                        understand how systems are communicating,
+                        identify abnormal behavior, and distinguish
+                        legitimate network activity from potential
+                        security incidents. The tools and exercises
+                        below introduce common sources of TCP and UDP
+                        evidence while providing opportunities to
+                        practice the investigative skills used during
+                        real-world security investigations.
+                    </p>
+                    <h3>
+                        Firewall and Network Device Logs
+                    </h3>
+                        <p>
+                            Once suspicious TCP or UDP activity
+                            has been identified, firewall and 
+                            network device logs are often the 
+                            first source analysts examine
+                            because they provide a centralized
+                            record of network communications
+                            occurring throughout the environment.
+                            These logs capture connection attempts,
+                            protocols, ports, source and destination
+                            systems, and the actions taken by network
+                            security devices, allowing analysts to
+                            identify abnormal communication patterns
+                            before pivoting to packet captures, endpoint 
+                            telemetry, or other evidence sources. Because
+                            most network traffic passes through these
+                            devices, firewall and network logs frequently 
+                            provide some of the earliest evidence of 
+                            suspicious transport-layer activity.
+                        </p>
+                        <p>
+                        <strong>
+                            Key Information:
+                        </strong>
+                        </p>
+                            <ul>
+                                <li> 
+                                    <strong>
+                                        Source IP address – 
+                                    </strong>
+                                    Identifies the system initiating the communication.
+                                </li>
+                                <li>
+                                    <strong>
+                                        Destination IP address – 
+                                    </strong>
+                                Identifies the intended recipient of the traffic.
+                                </li>
+                                <li>
+                                    <strong>
+                                        Protocol (TCP or UDP) –
+                                    </strong>
+                                    Indicates which transport protocol was used. 
+                                </li>
+                                <li>
+                                    <strong>
+                                        Source and destination ports –
+                                    </strong>
+                                    Identify the services or applications involved 
+                                    in the communication. 
+                                </li>
+                                <li>
+                                    <strong>
+                                        Connection action 
+                                        (allowed, denied, reset, etc.) –
+                                    </strong>
+                                    Shows how the firewall or network device 
+                                    handled the traffic. 
+                                </li>
+                                <li>
+                                    <strong>
+                                        Session details – 
+                                    </strong>
+                                    May include connection duration, 
+                                    bytes transferred, connection
+                                    state, or other metadata depending
+                                    on the device. 
+                                </li>
+                            </ul>
+                            <p>   
+                                <strong>
+                                    Common Findings:
+                                </strong>
+                            </p>
+                                    <ul>
+                                        <li> 
+                                            Repeated connection attempts across
+                                            multiple ports or systems that may
+                                            indicate reconnaissance or port
+                                            scanning. 
+                                        </li>
+                                        <li> 
+                                            Significant increases in TCP or UDP 
+                                            traffic directed toward a specific 
+                                            host or service that may suggest 
+                                            denial-of-service activity. 
+                                        </li>
+                                        <li>
+                                            Unexpected communication using 
+                                            uncommon ports or protocols 
+                                            that differs from normal 
+                                            network behavior. 
+                                        </li>
+                                        <li> 
+                                            Blocked or denied connections
+                                            involving unauthorized 
+                                            services, restricted ports, 
+                                            or suspicious external
+                                            systems. 
+                                        </li>
+                                    </ul>
+                                <p>                                      
+                                    <strong>
+                                        Skill Builder:
+                                    </strong>
+                                    Review firewall logs from a home
+                                    router, firewall appliance, virtual
+                                    firewall, home lab, or publicly 
+                                    available sample dataset. Generate
+                                    normal network activity by browsing
+                                    websites, resolving DNS queries, or 
+                                    connecting to another device in your 
+                                    lab, then identify the source and
+                                    destination addresses, ports,
+                                    protocols, and actions recorded in
+                                    the logs. If you have access to a
+                                    virtual machine, perform a basic 
+                                    TCP or UDP scan against that system
+                                    using Nmap and compare how the 
+                                    resulting activity differs from 
+                                    routine network traffic.
+                                </p>
+
+                <h3>
+                    SIEM and Log Correlation
+                </h3>
+                    <p>
+                        Transport-layer activity rarely provides
+                        enough evidence to determine whether an
+                        event is malicious on its own. Analysts 
+                        use Security Information and Event 
+                        Management (SIEM) platforms to correlate
+                        firewall logs, intrusion detection alerts,
+                        endpoint telemetry, authentication events,
+                        and other security data to build a more 
+                        complete picture of network activity. This
+                        broader perspective helps analysts 
+                        distinguish isolated events from larger 
+                        attack patterns while reducing the 
+                        likelihood of drawing conclusions from a
+                        single source of evidence.
+                    </p>
+                    <p>
+                        Key Information:
+                    </p>
+                        <ul>
+                            <li> 
+                                <strong> 
+                                    Correlated firewall events – 
+                                </strong>
+                                Reveal communication patterns across multiple systems. 
+                            </li>
+                            <li> 
+                                <strong>
+                                    IDS/IPS alerts –
+                                </strong>
+                                Highlight suspicious network behavior
+                                associated with known attack techniques. 
+                            </li>
+                            <li> 
+                                <strong>
+                                    Endpoint telemetry –
+                                </strong>
+                                Associates network activity with specific
+                                processes or users. 
+                            </li>
+                            <li> 
+                                <strong> 
+                                    Authentication events – 
+                                </strong>
+                                Help determine whether suspicious 
+                                network activity coincides with 
+                                account activity. 
+                            </li>
+                            <li>
+                                <strong> 
+                                    Event timelines –
+                                </strong>
+                                Show how related events occur 
+                                before, during, and after 
+                                suspicious communications. 
+                            </li>
+                        </ul>
+                        <p>
+                            <strong>
+                                Common Findings:
+                            </strong>
+                            <ul>
+                                <li> Multiple related alerts that reveal 
+                                    reconnaissance followed by 
+                                    exploitation attempts. 
+                                </li> 
+                                <li> 
+                                    Correlated network and endpoint 
+                                activity indicating the same system is 
+                                involved in multiple suspicious events. 
+                                </li>
+                                <li>
+                                    Repeated connection attempts
+                                    occurring across numerous 
+                                    hosts within a short period.
+                                </li>
+                                <li> 
+                                    Network events that appear suspiciou
+                                    s individually but are explained by 
+                                    scheduled maintenance, vulnerability
+                                    scans, or authorized administrative 
+                                    activity. 
+                                </li>
+                                <p>
+                                    <strong>
+                                        Skill Builder: 
+                                    </strong>
+                                    Download publicly available SIEM 
+                                    datasets or sample log files and 
+                                    identify multiple events that 
+                                    relate to the same system or 
+                                    connection. Practice building 
+                                    a simple timeline showing how
+                                    firewall events, endpoint activity,
+                                    and authentication records support 
+                                    or contradict one another during an
+                                    investigation.
+                                </p>
+
+
+                            <h3>
+                                 Packet Captures and Protocol Analysis
+                            </h3>
+                                <p>
+                                    Packet captures provide the 
+                                    most detailed view of TCP and
+                                    UDP communications by allowing 
+                                    analysts to examine individual 
+                                    packets exchanged between 
+                                    systems. Unlike logs that 
+                                    summarize activity, packet 
+                                    captures reveal how 
+                                    communication actually 
+                                    occurred, making them
+                                    valuable for validating 
+                                    suspicious behavior and 
+                                    answering questions that other 
+                                    evidence sources cannot. Analysts 
+                                    frequently use packet analysis to
+                                    confirm attack patterns, identify
+                                    protocol anomalies, and understand 
+                                    the sequence of events during an 
+                                    investigation.
+                                </p>
+                                <p>
+                                    <strong>
+                                        Key Information:
+                                    </strong>
+                                </p>
+                                    <ul>
+                                        <li>
+                                            <strong>
+                                                TCP handshakes – 
+                                            </strong>
+                                            Confirm whether connections 
+                                            were successfully established. 
+                                        </li>
+                                        <li>
+                                            <strong>
+                                                TCP flags – 
+                                            </strong>
+                                            Help identify connection
+                                            setup, termination, and 
+                                            abnormal behavior.
+                                        </li>
+                                        <li>
+                                            <strong>
+                                                Sequence and acknowledgment numbers –
+                                            </strong>
+                                            Reveal communication flow and possible 
+                                            manipulation. 
+                                        </li>
+                                        <li>
+                                            <strong>
+                                                Retransmissions and resets –
+                                            </strong>
+                                                    May indicate connectivity
+                                                    issues or attempts to disrupt
+                                                    communications.
+                                        </li>
+                                        <li>
+                                             <strong>
+                                                 UDP datagrams – 
+                                             </strong>
+                                            Show connectionless communication 
+                                            and traffic patterns. 
+                                        </li>
+                                    </ul>
+                                <p>
+                                    <strong>
+                                       Common Findings:
+                                    </strong>
+                                </p>
+                                <ul>
+                                    <li> 
+                                        Successful TCP handshakes associated
+                                        with legitimate application traffic.
+                                    </li>
+                                    <li>
+                                        Incomplete handshakes or excessive SYN 
+                                        packets that may indicate scanning or 
+                                        denial-of-service activity.
+                                    </li>
+                                    <li> 
+                                        Unexpected TCP reset packets or 
+                                        abnormal retransmissions. 
+                                    </li>
+                                    <li> UDP traffic patterns that differ 
+                                        significantly from expected application
+                                        behavior. 
+                                    </li>
+                                    <p>
+                                        <strong>
+                                            Skill Builder: 
+                                        </strong>
+                                        Capture network traffic using
+                                        Wireshark while browsing websites,
+                                        performing DNS lookups, or 
+                                        connecting to another system in a
+                                        home lab. Identify TCP handshakes,
+                                        observe the differences between TCP 
+                                        and UDP communications, and compare 
+                                        the packet-level activity with the 
+                                        corresponding firewall logs or 
+                                        connection records.
+                                    </p>
+
+                                 <h3>
+                                     Endpoint / EDR Telemetry
+                                 </h3>
+                                    <p>
+                                        Network traffic explains how systems 
+                                        communicate, but endpoint telemetry
+                                        explains what was happening on the
+                                        system that generated the communication.
+                                        Endpoint Detection and Response (EDR)
+                                        platforms and operating system logs 
+                                        help analysts associate TCP and UDP
+                                        activity with specific processes, 
+                                        services, users, and applications.
+                                        Combining endpoint and network 
+                                        evidence allows analysts to determine
+                                        whether observed communications are
+                                        consistent with expected system behavior 
+                                        or require additional investigation.
+                                    </p>
+                                    <p>
+                                        <strong>
+                                            Key Information:
+                                        </strong>
+                                    </p>
+                                    <ul>
+                                        <li>
+                                            <strong> 
+                                                Running processes –
+                                            </strong>
+                                            Identify which application 
+                                            initiated the communication.
+                                        </li>
+                                        <li>
+                                            <strong>
+                                                Parent-child process relationships –
+                                            </strong>
+                                            Provide context surrounding process execution.
+                                        </li>
+                                        <li>
+                                            <strong>
+                                                Network connections – 
+                                            </strong>
+                                            Associate active communications with
+                                            specific applications. 
+                                        </li>
+                                        <li>
+                                            <strong>
+                                                Listening services – 
+                                            </strong>
+                                            Identify applications accepting
+                                            inbound connections. 
+                                        </li>
+                                        <li>
+                                            <strong>
+                                                User context –
+                                            </strong>
+                                            Helps determine who initiated the activity.
+                                        </li>
+                                    </ul> 
+                                    <p>
+                                        <strong>
+                                            Common Findings:
+                                        </strong>
+                                    </p>
+                                    <ul>
+                                        <li> Legitimate applications 
+                                            communicating over 
+                                            expected ports. 
+                                        </li>
+                                        <li>
+                                            Administrative tools 
+                                            generating authorized
+                                            network activity. 
+                                        </li>
+                                        <li>
+                                            Unexpected processes 
+                                            establishing external
+                                            communications. 
+                                        </li>
+                                        <li>
+                                            Malware or unauthorized 
+                                            software creating network
+                                            connections inconsistent 
+                                            with normal system behavior.
+                                        </li>
+                                    </ul>
+                                    <p>
+                                        <strong>
+                                            Skill Builder: 
+                                        </strong>
+                                        Use operating system tools 
+                                        such as netstat, ss, or 
+                                        Get-NetTCPConnection to 
+                                        identify active TCP and UDP
+                                        connections on your computer. 
+                                        Match those connections to the 
+                                        processes that created them using 
+                                        Task Manager, Resource Monitor, or 
+                                        similar utilities, then determine
+                                        whether the observed activity matches 
+                                        what you expected the system to be doing.
+                                    </p>
+
+                                <h3>
+                                    Network Traffic Controls and Enforcement (Working Title)
+                                </h3>
+                                    <p>
+                                        Network security controls help 
+                                        organizations regulate TCP and 
+                                        UDP communications while generating
+                                        valuable evidence during 
+                                        investigations. Firewalls, intrusion
+                                        prevention systems, access control
+                                        lists, segmentation, and other 
+                                        enforcement mechanisms influence
+                                        how traffic moves through the network 
+                                        and often provide the first indication 
+                                        that suspicious activity has occurred.
+                                        Understanding how these controls operate
+                                        helps analysts interpret security events,
+                                        evaluate defensive effectiveness, and
+                                        recognize both successful and blocked 
+                                        attack attempts.
+                                    </p>
+                                    <p>
+                                        <strong>
+                                            Key Information:
+                                        </strong>
+                                    </p>
+                                    <ul>
+                                        <li>
+                                            <strong>
+                                                Firewall policies – 
+                                            </strong>
+                                            Control which communications
+                                            are permitted or denied. 
+                                        </li>
+                                        <li>
+                                            <strong>
+                                                Access control lists (ACLs) –
+                                            </strong>
+                                            Restrict traffic between networks, 
+                                            systems, or services. 
+                                        </li>
+                                        <li>
+                                            <strong>
+                                                Intrusion detection and 
+                                                prevention systems (IDS/IPS) –
+                                            </strong>
+                                            Detect or block suspicious 
+                                            transport-layer activity.
+                                        </li>
+                                        <li>
+                                            <strong>
+                                                Network segmentation –
+                                            </strong>
+                                            Limits communication between 
+                                            systems to reduce attack paths. 
+                                        </li>
+                                        <li>
+                                            <strong>
+                                                Traffic filtering and rate 
+                                                limiting – 
+                                            </strong>
+                                            Help protect services from excessive 
+                                            or unauthorized communications. 
+                                        </li>
+                                    </ul>
+                                    <p>
+                                        <strong>
+                                            Common Findings:
+                                        </strong>
+                                    </p>
+                                    <ul>
+                                        <li>
+                                            Blocked connection attempts targeting 
+                                            restricted services or ports. 
+                                        </li>
+                                        <li>IDS/IPS alerts identifying 
+                                            suspicious transport-layer 
+                                            behavior. 
+                                        </li>
+                                        <li>Traffic denied because of 
+                                            segmentation or firewall 
+                                            policy. 
+                                        </li>
+                                        <li>
+                                            Rate-limited communications 
+                                            associated with excessive 
+                                            connection attempts or 
+                                            denial-of-service activity.
+                                        </li>
+                                        <p>
+                                            <strong>
+                                                Skill Builder:
+                                            </strong>
+                                            If you have access to a home
+                                            firewall, virtual firewall, or
+                                            router with configurable rules,
+                                            create a rule that blocks or
+                                            allows a specific TCP or UDP port
+                                            and observe how the resulting network 
+                                            activity changes. If you do not have
+                                            access to a configurable firewall,
+                                            review documentation or demonstrations 
+                                            of common firewall rules and predict how 
+                                            those rules would affect the TCP or UDP
+                                            communications discussed throughout this
+                                            article.
+                                        </p>
+
+
+                        <h2>
+                            SOC Analyst Perspective
+                        </h2>
+                            <p>
+                                Understanding how TCP and UDP function is only part of network analysis. The next step is learning how to apply that knowledge during an investigation. Alerts provide a starting point, but they rarely identify the root cause of suspicious activity on their own. Analysts must validate the reported behavior, examine the available evidence, and determine whether the observed activity is consistent with normal network operations or indicates malicious behavior. The workflows below demonstrate a structured approach to investigating several common TCP and UDP attack patterns. While the examples discuss potential mitigation strategies, organizational procedures determine whether analysts implement containment measures directly or document their findings and escalate the incident to other teams. Understanding your organization's roles, responsibilities, and incident response procedures is an essential part of effective security operations.
+                            </p>
+
+                                        
+                            <h3>
+                                Investigating Suspected SYN Flood Activity
+                            </h3>
+                                 <p>
+                                      A SYN flood attempts to exhaust a server's resources by sending large numbers of TCP connection requests without completing the three-way handshake. As incomplete connections accumulate, legitimate users may experience slow performance or become unable to establish new TCP sessions. Similar connection patterns, however, may also result from temporary traffic spikes, network congestion, or misconfigured applications. The analyst's goal is to determine whether the observed activity represents normal network behavior or an attempt to disrupt TCP connection establishment.      
+                                 </p>
+                                <p>
+                                    <strong>
+                                       First — Identify systems generating unusually high numbers of incomplete TCP connection attempts. 
+                                    </strong>
+                                </p>
+                                <p>
+                                    Begin by identifying the systems associated with the alert and determine whether they are generating significantly more incomplete TCP handshakes than similar systems during the same time period. Compare the volume and distribution of incomplete connection attempts against the system's normal behavior to determine whether the activity is unusual for that environment. As you characterize the activity, consider whether the connection attempts are concentrated on a single destination, distributed across multiple systems, or sustained over an extended period. These observations establish the scope of the activity and help determine whether the alert warrants deeper investigation.
+                                </p>
+                                        
+                                        
+
+                                    
+                            
+
+                    
+
+                       
+                    
+                
+
+                    
 
             </section>
 
