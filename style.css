@@ -6,6 +6,7 @@
     --color-accent: #0F6B6D;
     --color-dark: #244849;
     --color-accent-secondary: #3A8586;
+    --color-accent-tertiary: #2F6667;
     --color-accent-light: #DCEEEF;
     --color-accent-pale: #DCEEEF;
 }
@@ -102,7 +103,7 @@ h3 {
     font-size: 1.15rem;
     margin-top: 1.75rem;
     margin-bottom: 0.5rem;
-    color: var(--color-dark);
+    color: var(--color-accent-tertiary);
 }
 
 /* Paragraphs */
