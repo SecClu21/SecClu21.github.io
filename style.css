@@ -111,6 +111,11 @@ p {
     margin-bottom: 1rem;
 }
 
+/* Section transition paragraph */
+.section-transition {
+    margin-top: 2rem;
+}
+
 /* Lists */
 ul,
 ol {
