@@ -136,8 +136,8 @@ ol {
 .guide-box {
     width: 90%;
     margin: 2rem auto;
-    padding: 1.5rem 2.2rem 1.5rem 2.4rem;
-
+    padding: 1.5rem 2.25rem 1.5rem 2rem;
+   
     background-color: var(--color-accent-pale);
   
     border-right: 1px solid var(--color-accent); 
