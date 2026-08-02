@@ -152,7 +152,7 @@ ol {
 
 /* Guide Information links*/
 .guide-box a {
-    color: var(--color-dark);
+    color: var(--color-accent-tertiary);
     text-decoration: underline;
 }
 
