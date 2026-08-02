@@ -149,6 +149,22 @@ ol {
 .guide-box h2 {
     margin-top: 0;
 }
+
+/* Guide Information links*/
+.guide-box a {
+    color: var(--color-accent-tertiary);
+    text-decoration: underline;
+}
+
+.guide-box a:hover,
+.guide-box a:focus {
+    color: var(--color-accent);
+}
+
+.guide-box a:visited {
+    color: var(--color-accent-secondary);
+}
+
 /* ========================================
    4. Links
 ======================================== */
