@@ -51,7 +51,7 @@ header {
 .site-title {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--color-dark);
+    color: black;
     margin-bottom: 0.75rem;
 }
 
