@@ -201,15 +201,38 @@ ol {
     text-decoration: underline;
 }
 
+/* Article navigation */
+.article-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+
+    border-top: 1px solid #d8d8d8;
+}
+
+/* Article navigation links */
+.article-navigation a {
+    width: 42%;
+
+    color: var(--color-accent-tertiary);
+    text-decoration: underline;
+}
+
+.next-article {
+    text-align: right;
+    margin-left: auto;
+}
+
 /* Default hyperlink appearance */
-a {
     a {
     color: var(--color-accent-tertiary);
     text-decoration: underline;
     transition: color 0.2s ease-in-out;
 }
 
-}
 
 /* Mouse hover */
 a:hover {
