@@ -44,6 +44,12 @@ header {
     padding: 1rem 2rem;
 }
 
+/* Site footer */
+footer {
+    padding: 1rem 2rem;
+    margin-top: 3rem;
+}
+
 /* ========================================
    2. Typography
 ======================================== */
@@ -215,7 +221,7 @@ ol {
 
 /* Article navigation links */
 .article-navigation a {
-    width: 42%;
+    flex: 0 0 42%;
 
     color: var(--color-accent-tertiary);
     text-decoration: underline;
