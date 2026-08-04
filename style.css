@@ -209,9 +209,9 @@ ol {
 
 /* Article navigation */
 .article-navigation {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 6rem;
 
     margin-top: 3rem;
     padding-top: 1.5rem;
@@ -221,15 +221,40 @@ ol {
 
 /* Article navigation links */
 .article-navigation a {
-    flex: 0 0 42%;
+    display: flex;
+    align-items: flex-start;
 
     color: var(--color-accent-tertiary);
     text-decoration: underline;
+
+   max-width: 85%
 }
 
+/* Previous article*/
+.previous-artilce{
+   .justify-self: start;
+}
+
+/* Next article*/
 .next-article {
-    text-align: right;
-    margin-left: auto;
+   justify-self: end;
+   justify-content: flex-end;
+   text-align: right;
+}
+
+/*Article Navigation Arrow*/
+.nav-arrow{
+   flex: 0 0 auto;
+}
+
+/* Article Navigation Title*/
+.nav-title{
+   flex: 1;
+}
+
+/*Empty Placeholder for article Navigation*/
+.nav-placeholder{
+   visibility: hidden;
 }
 
 /* Default hyperlink appearance */
