@@ -227,12 +227,12 @@ ol {
     color: var(--color-accent-tertiary);
     text-decoration: underline;
 
-   max-width: 85%
+   max-width: 85%;
 }
 
 /* Previous article*/
-.previous-artilce{
-   .justify-self: start;
+.previous-article{
+   justify-self: start;
 }
 
 /* Next article*/
@@ -249,7 +249,7 @@ ol {
 
 /* Article Navigation Title*/
 .nav-title{
-   flex: 1;
+   flex: 0 1 auto;
 }
 
 /*Empty Placeholder for article Navigation*/
