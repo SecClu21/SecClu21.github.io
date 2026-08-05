@@ -276,3 +276,25 @@ a:focus {
    outline: 2px solid var(--color-accent);
     outline-offset: 2px;
 }
+
+
+
+/* ========================================
+   5. SOC Guidebook Landing Page
+======================================== */
+
+
+
+
+/* ========================================
+   6. Footer (Temporary)
+======================================== */
+
+footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+
+    border-top: 1px solid #d8d8d8;
+
+    text-align: center;
+}
