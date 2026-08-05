@@ -221,13 +221,13 @@ ol {
 
 /* Article navigation links */
 .article-navigation a {
-    display: flex;
+    display: inline-flex;
     align-items: flex-start;
 
     color: var(--color-accent-tertiary);
     text-decoration: underline;
 
-   max-width: 100%;
+   max-width: fit-content;
 }
 
 /* Previous article*/
