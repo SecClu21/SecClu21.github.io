@@ -287,6 +287,7 @@ a:focus {
 /* Guidebook article cards */
 .guidebook-article {
     margin-bottom: 2rem;
+    max-width: 950px;
 }
 
 .guidebook-article > a {
