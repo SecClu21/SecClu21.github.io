@@ -284,37 +284,44 @@ a:focus {
    5. SOC Guidebook Landing Page
 ======================================== */
 
-/* Guidebook article cards */
+/* Individual article in the guidebook list */
 .guidebook-article {
     margin-bottom: 2rem;
-    max-width: 950px;
 }
 
-.guidebook-article > a {
-    display: block;
+/* Reusable content card */
+.content-card {
+    max-width: 950px;
 
-    padding: 1rem 1.5rem 0.5rem;
+    padding: 1rem 1.5rem;
 
     background-color: #ffffff;
 
     border-left: 4px solid var(--color-accent);
-    border-top-right-radius: 6px;
-    border-bottom-right-radius: 6px;
+    border-radius: 6px;
+
+    border: 1px solid #d8d8d8;
+    border-left: 4px solid var(--color-accent);
+}
+
+/* Card title */
+.content-card > a {
+    display: block;
+
+    margin-bottom: 0.5rem;
+
+    color: var(--color-accent-tertiary);
 
     font-size: 1.1rem;
     font-weight: 600;
+
+    text-decoration: underline;
 }
 
-.guidebook-article > p {
-    padding: 0 1.5rem 1rem;
-
-    background-color: #ffffff;
-
-    border-left: 4px solid var(--color-accent);
-    border-bottom-right-radius: 6px;
+/* Card description */
+.content-card > p {
+    margin-bottom: 0;
 }
-
-
 
 
 /* ========================================
