@@ -9,7 +9,7 @@
 
 
     <title>
-        TCP vs UDP: What Analysts Detect in Network Traffic | Bits, Bytes & Security
+        TCP and UDP for SOC Analysts: Detection, Investigation, and Traffic Analysisc | Bits, Bytes & Security
     </title>
 
 <!-- Primary SEO metadata -->
@@ -23,7 +23,7 @@
     <meta name="robots" content="index, follow">
 
 <!-- Open Graph -->
-    <meta property="og:title" content="TCP vs UDP: What Analysts Detect in Network Traffic">
+    <meta property="og:title" content="TCP and UDP for SOC Analysts: Detection, Investigation, and Traffic Analysis">
 
     <meta property="og:description" content="Explore the differences between TCP and UDP, how these protocols appear in network traffic, and why security analysts monitor them during investigations.">
 
@@ -245,7 +245,7 @@
 
                     <li>
                         <a
-                            href="https://www.youtube.com/watch?v=xdQ9sgpkrX8"> TCP Funadmentals Part 1: Chris Greer on Youtube
+                            href="https://www.youtube.com/watch?v=xdQ9sgpkrX8"> TCP Fundamentals Part 1: Chris Greer on Youtube
                         </a>
                     </li>
                     <li>
@@ -318,16 +318,7 @@
                     <p>
                         Before TCP transfers any data, it establishes a connection through a three-way handshake. The client begins by sending a synchronization (SYN) packet, the server acknowledges with a synchronization-acknowledgment (SYN-ACK), and the client completes the process with an acknowledgment (ACK). Once the connection is established, TCP uses sequence numbers and acknowledgments to track data delivery and maintain the correct order of the data stream. If data is lost or not acknowledged, TCP can retransmit the missing data to support reliable communication.
                     </p>
-                    <p>
-                        UDP takes a much simpler approach. Rather than establishing
-                        a connection, it immediately sends independent packets, 
-                        called datagrams, to the destination without verifying that
-                        they arrive or are received in order. This lightweight 
-                        design reduces communication overhead and makes UDP well
-                        suited for applications such as DNS, Voice over IP (VoIP),
-                        video streaming, and online gaming, where low latency is
-                        often more important than perfect reliability.
-                    </p>
+     
                     <p>
                         UDP takes a much simpler approach. Rather than establishing a connection, it immediately sends independent packets, called datagrams, to the destination without verifying that they arrive or are received in order. This lightweight design minimizes communication overhead and makes UDP well suited for applications such as DNS, Voice over IP (VoIP), video streaming, and online gaming, where low latency is often more important than perfect reliability.
                     </p>
@@ -362,7 +353,7 @@
                             </p>
                             <p>
                                 <strong> Indicators: </strong>
-                                Analysts may observe unusually high numbers of SYN packets with comparatively few completed handshakes, incomplete TCP connections, or connections remaining in the SYN_RECV state in firewall logs, IDS alerts, or packet captures. While these indicators are consistent with SYN flood activity, they do not confirm that an attack is occurring. Temporary traffic spikes, load testing, or application and network issues can produce similar observations. Analysts should correlate multiple sources of evidence and consider the surrounding context before determining whether the volume of incomplete connection attempts reflects a malicious attempt to exhaust resources or a legitimate traffic condition.
+                                Analysts may observe unusually high numbers of SYN packets with comparatively few completed handshakes, incomplete TCP connections, or connections remaining in the SYN_RECV state in firewall logs, IDS alerts, or packet captures. None of these observations, on their own, distinguish a deliberate SYN flood from a server experiencing a temporary traffic spike or misconfiguration. Temporary traffic spikes, load testing, or application and network issues can produce similar observations. Analysts should correlate multiple sources of evidence and consider the surrounding context before determining whether the volume of incomplete connection attempts reflects a malicious attempt to exhaust resources or a legitimate traffic condition.
                             </p>
                 
                         <h4>
@@ -381,7 +372,7 @@
                                 <strong>
                                     Indicators:
                                 </strong>
-                                Analysts may observe repeated connection attempts from the same source, sequential destination ports, or activity targeting multiple systems in rapid succession in firewall logs, IDS alerts, or network traffic captures. Endpoint telemetry can provide additional context when the scan targets a specific system or originates from an internal host. While these indicators can suggest reconnaissance, they do not confirm malicious intent. Vulnerability scanners, asset discovery tools, network administrators, and authorized penetration tests often generate similar traffic. Analysts should correlate the scanning activity with known administrative tools, authorized assessments, and the systems involved before determining whether the observed probing represents expected reconnaissance activity or an unauthorized attempt to identify accessible services.
+                                Analysts may observe repeated connection attempts from the same source, sequential destination ports, or activity targeting multiple systems in rapid succession in firewall logs, IDS alerts, or network traffic captures. Endpoint telemetry can provide additional context when the scan targets a specific system or originates from an internal host. A scanner and a system administrator running an authorized vulnerability scan can produce nearly identical connection patterns, so the indicators alone are not enough to tell them apart. Vulnerability scanners, asset discovery tools, network administrators, and authorized penetration tests often generate similar traffic. Analysts should correlate the scanning activity with known administrative tools, authorized assessments, and the systems involved before determining whether the observed probing represents expected reconnaissance activity or an unauthorized attempt to identify accessible services.
                             </p>
 
                         <h4>
@@ -400,7 +391,7 @@
                                 <strong>
                                     Indicators: 
                                 </strong>
-                               Analysts may observe unexpected RST packets that do not align with the normal flow of a TCP session in packet captures or connection logs. Repeated resets affecting a particular application or system may also appear in endpoint telemetry, while IDS alerts can identify reset activity that matches known disruption patterns. While these indicators may suggest an attempt to disrupt TCP communications, they do not confirm that a TCP Reset attack is occurring. Network devices, firewalls, application timeouts, configuration changes, or legitimate protocol behavior can also generate reset packets. Analysts should examine the affected sessions, systems, and timing of the resets alongside other network evidence before determining whether the interruptions reflect malicious attempts to disrupt communications or an underlying network, application, or configuration issue.
+                               Analysts may observe unexpected RST packets that do not align with the normal flow of a TCP session in packet captures or connection logs. Repeated resets affecting a particular application or system may also appear in endpoint telemetry, while IDS alerts can identify reset activity that matches known disruption patterns. An unexplained reset raises a question rather than answering one, since several ordinary conditions can produce the same packet. Network devices, firewalls, application timeouts, configuration changes, or legitimate protocol behavior can also generate reset packets. Analysts should examine the affected sessions, systems, and timing of the resets alongside other network evidence before determining whether the interruptions reflect malicious attempts to disrupt communications or an underlying network, application, or configuration issue.
                             </p>
 
                         <h4>
@@ -419,7 +410,7 @@
                                 <strong>
                                      Indicators:
                                 </strong>
-                                    Analysts may observe unexpected TCP reset (RST) packets, irregular sequence or acknowledgment numbers, or traffic that is inconsistent with the normal flow of an established session in packet captures. Authentication logs and endpoint telemetry may provide additional evidence when disrupted connections coincide with suspicious account activity or unexpected changes in user behavior. While these indicators can suggest an attempt to interfere with an active session, they do not confirm that session hijacking is occurring. Network instability, application errors, routing changes, or legitimate connection resets can produce similar observations. Analysts should correlate session anomalies with authentication activity, endpoint behavior, and other available evidence before determining whether the observed changes indicate an attempt to interfere with an established session or a legitimate disruption of the connection.
+                                    Analysts may observe unexpected TCP reset (RST) packets, irregular sequence or acknowledgment numbers, or traffic that is inconsistent with the normal flow of an established session in packet captures. Authentication logs and endpoint telemetry may provide additional evidence when disrupted connections coincide with suspicious account activity or unexpected changes in user behavior. Any one of these anomalies has an unremarkable explanation on its own. It is only when several occur together that they start to look deliberate. Network instability, application errors, routing changes, or legitimate connection resets can produce similar observations. Analysts should correlate session anomalies with authentication activity, endpoint behavior, and other available evidence before determining whether the observed changes indicate an attempt to interfere with an established session or a legitimate disruption of the connection.
                             </p>
 
                 
@@ -442,7 +433,7 @@
                                 <strong>
                                     Indicators:
                                 </strong>
-                               Analysts may observe unusually large volumes of UDP traffic, increased bandwidth utilization, or a sudden rise in traffic directed at specific UDP services through network flow data, firewall logs, or packet captures. While these indicators may be consistent with a UDP flood, they do not confirm that one is occurring. Legitimate events such as software updates, media streaming, backups, large file transfers, or temporary spikes in network activity can produce similar observations. Analysts should correlate traffic volume with affected services and surrounding network conditions before determining whether the activity represents a deliberate attempt to exhaust resources or an unusual but legitimate increase in demand.
+                               Analysts may observe unusually large volumes of UDP traffic, increased bandwidth utilization, or a sudden rise in traffic directed at specific UDP services through network flow data, firewall logs, or packet captures. Traffic volume alone rarely settles the question, since a large software update or backup job can generate traffic just as heavy as an attack. Legitimate events such as software updates, media streaming, backups, large file transfers, or temporary spikes in network activity can produce similar observations. Analysts should correlate traffic volume with affected services and surrounding network conditions before determining whether the activity represents a deliberate attempt to exhaust resources or an unusual but legitimate increase in demand.
                             </p>
                 
                         <h4>
